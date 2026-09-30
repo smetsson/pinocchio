@@ -83,7 +83,7 @@ Rooms become unreadable as soon as they expire, and the app deletes expired room
    - Name: `FIREBASE_SERVICE_ACCOUNT`
    - Secret: open the downloaded `.json` file in a text editor, copy **everything**, and paste it here. Click **Add secret**.
 3. **Delete the downloaded `.json` file** from your computer. Never commit it.
-4. Test it: **Actions** tab → **Delete expired rooms** → **Run workflow**.
+4. Test it: open the **Actions** tab, click **Delete expired rooms** in the **left sidebar** (on a phone: tap the ☰ / "All workflows" menu first), then **Run workflow** → **Run workflow**. After ± 30 seconds you should see a green ✅; the log says `🧹 Deleted N expired room(s)`.
 
 > GitHub pauses scheduled workflows in repositories with no activity for 60 days. Adding a monthly prompt pack keeps it active; if it's paused, the Actions tab shows a button to re-enable it.
 
