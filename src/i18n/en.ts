@@ -30,7 +30,25 @@ export const en = {
     joinButton: 'Join',
     rejoin: (code: string) => `Back to room ${code}`,
     notConfigured: 'Firebase is not configured yet. Paste your config into src/firebase-config.ts (see README).',
-    howTo: 'Everyone plays on their own phone. Write believable lies about your colleagues, spot the truth, and fool your friends.',
+  },
+
+  howTo: {
+    title: '📖 How to play',
+    steps: [
+      { icon: '📱', title: 'Everyone on their own phone', text: 'The host creates a room and shares the link. Join with a name and an emoji.' },
+      { icon: '✍️', title: 'Tell the truth', text: 'Answer 2 questions about yourself, truthfully. Your colleagues will try to fake your answers.' },
+      { icon: '🤥', title: 'Lie about a colleague', text: 'When a question is about someone else, write a believable fake answer. Stuck? Tap 🎲 Lie for me.' },
+      { icon: '🔍', title: 'Find the truth', text: 'All lies are mixed with the real answer. Pick the one you think is true, and 👍 your favourite lie.' },
+      { icon: '🎭', title: 'Final round: Truth or Lie', text: 'Write one true fact and one lie about yourself. The others guess which one is true.' },
+    ],
+    pointsTitle: 'Points',
+    points: {
+      truth: (n: number) => `Find the truth: +${n.toLocaleString()}`,
+      fooled: (n: number) => `Each player who falls for your lie: +${n.toLocaleString()}`,
+      like: (n: number) => `Each 👍 on your lie: +${n.toLocaleString()}`,
+      multiplier: (round: string, m: number) => `${round} counts ${m === 2 ? 'double' : `${m}×`}!`,
+    },
+    tip: '💡 Tip: the best lies are short, specific and sound just like that colleague.',
   },
 
   profile: {

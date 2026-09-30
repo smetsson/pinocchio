@@ -62,6 +62,11 @@ test('home and join screens fit the phone', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Create a room')).toBeVisible();
   await expectPhoneFriendly(page);
+  // First visit: the rules are open, with point values from the scoring config.
+  await expect(page.getByText('Find the truth: +1,000')).toBeVisible();
+  await expect(page.getByText('Round 2 counts double!')).toBeVisible();
+  await page.getByText('📖 How to play').click();
+  await expect(page.getByText('Find the truth: +1,000')).toBeHidden();
   await page.getByLabel('Room code').fill('ZZZZ');
   await page.getByRole('button', { name: 'Join', exact: true }).click();
   await expect(page.getByText("That room doesn't exist")).toBeVisible();

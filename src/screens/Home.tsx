@@ -6,12 +6,15 @@ import { t } from '../i18n';
 import { go } from '../router';
 import { Logo } from '../app';
 import { cycleTheme } from '../theme';
+import { HowToPlay } from '../ui/HowToPlay';
 
 export function Home({ fb }: { fb: Fb }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const last = session.lastRoom();
+  // Open the rules for first-time visitors; returning players see them collapsed.
+  const firstVisit = !session.profile().name && !last;
 
   const join = async (e: Event) => {
     e.preventDefault();
@@ -70,7 +73,7 @@ export function Home({ fb }: { fb: Fb }) {
         ✨ {t.home.create}
       </button>
 
-      <p class="muted small center">{t.home.howTo}</p>
+      <HowToPlay open={firstVisit} />
     </div>
   );
 }

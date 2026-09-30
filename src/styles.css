@@ -1255,3 +1255,65 @@ label.field {
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 15%, var(--card));
 }
+
+/* ---------- How to play ---------- */
+.howto summary {
+  font-weight: 700;
+  font-size: 19px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+}
+.howto summary::-webkit-details-marker {
+  display: none;
+}
+.howto summary::after {
+  content: '▾';
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.howto[open] summary::after {
+  transform: rotate(180deg);
+}
+.howto[open] summary {
+  margin-bottom: 10px;
+}
+.howto-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.howto-steps li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.howto-steps p {
+  margin-top: 2px;
+}
+.howto-icon {
+  font-size: 26px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg2);
+  border-radius: 12px;
+}
+.howto-points {
+  margin: 14px 0 10px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-radius: 12px;
+}
+.howto-points ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}

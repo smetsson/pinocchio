@@ -5,6 +5,7 @@ import { activePids, isAway } from '../../logic/engine';
 import { joinLink, screenLink } from '../../router';
 import { Avatar, QR, shareOrCopy } from '../../ui/components';
 import { useGame } from '../../ui/game';
+import { HowToPlay } from '../../ui/HowToPlay';
 
 export function Lobby() {
   const { room, code, pid: me, isHost, now } = useGame();
@@ -60,6 +61,7 @@ export function Lobby() {
           <p class="muted">{t.lobby.waitingHost}</p>
         </div>
       )}
+      <HowToPlay />
     </>
   );
 }
