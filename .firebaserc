@@ -1,1 +1,1 @@
-{ "projects": { "default": "demo-pinocchio" } }
+{ "projects": { "default": "demo-pinocchio", "prod": "pinocchio-smetsson" } }

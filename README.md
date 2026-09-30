@@ -208,6 +208,7 @@ Open http://localhost:5173. To test a full game alone, create a room and add bot
 | `npm run test:rules` | Security rules tests against the emulator |
 | `npm run test:e2e` | Playwright: 3 phones play a full game (iPhone + Android viewports) |
 | `npm run rules` | Regenerate `database.rules.json` from `scripts/build-rules.mjs` |
+| `npx firebase deploy --only database -P prod` | Upload `database.rules.json` to the live Firebase project (instead of pasting it in the console) |
 | `npm run build` | Production build into `dist/` |
 
 **Architecture.** Preact + TypeScript + Vite. `src/logic/` is pure game logic (no Firebase): `engine.ts` turns the room state into database updates. The host's phone runs it every 500 ms (`RoomScreen.tsx`). Truths and lies live under `priv/{player}` (readable only by the author and the host). The host publishes anonymised, shuffled options and keeps the answer key under `secret/`. Duplicate lies are rejected with salted hashes (`lieHashes/`), enforced by the security rules. Timers use Firebase's server clock.
