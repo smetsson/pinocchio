@@ -1,5 +1,5 @@
 /**
- * 🔧 PASTE YOUR FIREBASE CONFIG HERE (see README, step 1).
+ * 🔧 Firebase config for the pinocchio-smetsson project.
  * These values are not secret: they identify your project; the security rules protect the data.
  */
 export const firebaseConfig = {

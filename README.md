@@ -22,74 +22,22 @@ The host's phone runs the game (timers, scoring). Everything is stored in Fireba
 
 ---
 
-## 1. Create the free Firebase backend (± 10 minutes, once)
+## Your setup (already done ✅)
 
-You need a Google account. No credit card.
+Everything is set up and running. You don't need to do anything here; this is just where things live.
 
-1. Go to **https://console.firebase.google.com** and click **Create a project** (or *Add project*).
-   - Name: e.g. `pinocchio-team`.
-   - Google Analytics: **turn it off** (not needed). Click **Create project**.
-2. **Turn on anonymous sign-in**
-   - Left menu → **Build → Authentication** → **Get started**.
-   - Tab **Sign-in method** → click **Anonymous** → switch **Enable** on → **Save**.
-3. **Create the database**
-   - Left menu → **Build → Realtime Database** → **Create Database**.
-   - Location: **Belgium (europe-west1)** (or whatever is closest to your team).
-   - Choose **Start in locked mode** → **Enable**.
-4. **Paste the security rules**
-   - In Realtime Database, open the **Rules** tab.
-   - Delete everything in the editor, then paste the full contents of the file [`database.rules.json`](database.rules.json) from this repository.
-   - Click **Publish**.
-5. **Get your web config**
-   - Click the ⚙️ gear (top left) → **Project settings** → scroll to **Your apps** → click the **`</>`** (Web) icon.
-   - App nickname: `pinocchio`. Leave "Firebase Hosting" **unchecked**. Click **Register app**.
-   - You'll see a block like `const firebaseConfig = { apiKey: "...", ... }`.
-6. **Paste the config into the code**
-   - Open [`src/firebase-config.ts`](src/firebase-config.ts) (on GitHub: open the file → ✏️ pencil icon).
-   - Replace the placeholder values with yours: `apiKey`, `authDomain`, `databaseURL`, `projectId`, `appId`.
-   - ⚠️ If `databaseURL` is missing from Firebase's block, copy it from the top of the **Realtime Database** page. It looks like `https://pinocchio-team-default-rtdb.europe-west1.firebasedatabase.app`.
-   - These values are **not secret**. They only identify your project; the security rules protect the data.
-7. **Allow your website's address**
-   - **Authentication → Settings → Authorized domains → Add domain** → `YOUR-GITHUB-NAME.github.io`.
+| What | Where |
+|---|---|
+| 🎮 The game | **https://smetsson.github.io/pinocchio/** |
+| 💻 The code | https://github.com/smetsson/pinocchio: every change committed to `main` is published automatically (± 1 minute, see the **Actions** tab) |
+| 🔥 The backend | Firebase project **`pinocchio-smetsson`**: https://console.firebase.google.com/project/pinocchio-smetsson (Realtime Database in Belgium, anonymous sign-in) |
+| 🧹 Clean-up | GitHub Action **Delete expired rooms** runs every night; it uses the `FIREBASE_SERVICE_ACCOUNT` secret |
 
-> 💡 Whenever you change `database.rules.json` later (rare), paste it into the Rules tab again and click **Publish**.
+> GitHub pauses scheduled workflows in repositories with no activity for 60 days. Adding a monthly prompt pack keeps it active; if it's ever paused, the Actions tab shows a button to re-enable it. Expired rooms are unreadable either way.
 
 ---
 
-## 2. Put the game online with GitHub Pages (± 10 minutes, once)
-
-1. Create a free account on **https://github.com** if you don't have one.
-2. Create a new repository: **+** (top right) → **New repository**.
-   - Name: e.g. `pinocchio`. Visibility: **Public** (free GitHub Pages needs a public repo; it contains only code, never answers).
-   - Don't add a README (this project has one). Click **Create repository**.
-3. Upload the code. Easiest from a terminal in this folder:
-   ```bash
-   git remote add origin https://github.com/YOUR-GITHUB-NAME/pinocchio.git
-   git push -u origin main
-   ```
-4. Turn on Pages: in the repository → **Settings → Pages** → under **Build and deployment**, set **Source** to **GitHub Actions**.
-5. Go to the **Actions** tab. The workflow **Deploy to GitHub Pages** runs (± 1–2 minutes). When it shows a green ✅, your game is live at:
-
-   **`https://YOUR-GITHUB-NAME.github.io/pinocchio/`**
-
-From now on, **every change you commit to `main` is deployed automatically**, including edits made directly on github.com.
-
-### Automatic clean-up of old rooms (recommended, 5 minutes)
-
-Rooms become unreadable as soon as they expire, and the app deletes expired rooms whenever a new room is created. To also delete them **every night**, give GitHub a key:
-
-1. Firebase console → ⚙️ **Project settings → Service accounts** → **Generate new private key** → **Generate key**. A `.json` file downloads.
-2. GitHub repository → **Settings → Secrets and variables → Actions → New repository secret**.
-   - Name: `FIREBASE_SERVICE_ACCOUNT`
-   - Secret: open the downloaded `.json` file in a text editor, copy **everything**, and paste it here. Click **Add secret**.
-3. **Delete the downloaded `.json` file** from your computer. Never commit it.
-4. Test it: open the **Actions** tab, click **Delete expired rooms** in the **left sidebar** (on a phone: tap the ☰ / "All workflows" menu first), then **Run workflow** → **Run workflow**. After ± 30 seconds you should see a green ✅; the log says `🧹 Deleted N expired room(s)`.
-
-> GitHub pauses scheduled workflows in repositories with no activity for 60 days. Adding a monthly prompt pack keeps it active; if it's paused, the Actions tab shows a button to re-enable it.
-
----
-
-## 3. Running a game night 🎉
+## Running a game night 🎉
 
 ### Before the call (optional but recommended)
 1. Open the game on your phone → **Create a room**.
@@ -142,7 +90,7 @@ All answers are deleted automatically within 24 hours. You can also tap **🗑�
 
 ---
 
-## 4. Adding a new monthly prompt pack ✍️
+## Adding a new monthly prompt pack ✍️
 
 Prompt packs are simple JSON files in the [`prompts/`](prompts/) folder. The game remembers which questions your team has already played, so you see **fresh questions first**. Adding a new pack each month keeps it fresh.
 
@@ -200,7 +148,17 @@ npm install
 npm run dev:emu     # local game + local Firebase emulator (needs Java: brew install openjdk@21)
 ```
 
-Open http://localhost:5173. To test a full game alone, create a room and add bots: **☰ → Add 5 bots**, or add `?bots=5` to the room URL (`#/r/ABCD?bots=5`). Phones on the same Wi-Fi can join via your computer's IP address.
+Open http://localhost:5173. Phones on the same Wi-Fi can join via your computer's IP address.
+
+**Testing a full game alone** (works locally and on the live site): create a room, then add these to the room link:
+
+| Add to the link | What it does |
+|---|---|
+| `?bots=5` | 5 bot players join (also: **☰ → Add 5 bots** in the lobby) |
+| `&autoplay` | a bot also plays **your** seat, and the reveals move on by themselves |
+| `&fast` | all timers 5× shorter |
+
+For example `…/#/r/ABCD?bots=5&autoplay&fast` plays a whole game by itself in about 2 minutes. On the live site, use a separate group name (e.g. `Test`) so tests don't use up your team's fresh questions.
 
 | Command | What |
 |---|---|
@@ -208,7 +166,7 @@ Open http://localhost:5173. To test a full game alone, create a room and add bot
 | `npm run test:rules` | Security rules tests against the emulator |
 | `npm run test:e2e` | Playwright: 3 phones play a full game (iPhone + Android viewports) |
 | `npm run rules` | Regenerate `database.rules.json` from `scripts/build-rules.mjs` |
-| `npx firebase deploy --only database -P prod` | Upload `database.rules.json` to the live Firebase project (instead of pasting it in the console) |
+| `npx firebase deploy --only database -P prod` | Upload `database.rules.json` to the live Firebase project (after changing the rules; needs `npx firebase login` once) |
 | `npm run build` | Production build into `dist/` |
 
 **Architecture.** Preact + TypeScript + Vite. `src/logic/` is pure game logic (no Firebase): `engine.ts` turns the room state into database updates. The host's phone runs it every 500 ms (`RoomScreen.tsx`). Truths and lies live under `priv/{player}` (readable only by the author and the host). The host publishes anonymised, shuffled options and keeps the answer key under `secret/`. Duplicate lies are rejected with salted hashes (`lieHashes/`), enforced by the security rules. Timers use Firebase's server clock.
@@ -217,8 +175,8 @@ Open http://localhost:5173. To test a full game alone, create a room and add bot
 
 | Problem | Fix |
 |---|---|
-| "Firebase is not configured yet" | Paste your config into `src/firebase-config.ts` (step 1.6) and commit. |
-| Stuck on "Loading…" or "Something went wrong" | Check that **Anonymous** sign-in is enabled (1.2) and the `databaseURL` is correct (1.6). |
-| Can't create a room | Re-paste `database.rules.json` into the Rules tab and **Publish** (1.4). |
-| The site shows a 404 | Settings → Pages → Source must be **GitHub Actions**, and the Actions run must be green. |
-| The timer doesn't move on | The host's phone drives the game; keep the game open on the host's phone (the app keeps its screen awake). |
+| The timer doesn't move on | The host's phone runs the game: keep the game open (in the foreground) on the host's phone. It keeps its screen awake by itself. |
+| The host's phone died | Open the game again on the same phone, or open the **host recovery link** (☰ menu) on another phone. |
+| Someone can't join | Players can only join before the rounds start. Check the room code; rooms expire 24 hours after the game. |
+| A change isn't live yet | Check the **Actions** tab on GitHub: the latest **Deploy to GitHub Pages** run must be green ✅. Then refresh the page. |
+| "Something went wrong" / stuck on "Loading…" | Check https://status.firebase.google.com, and that **Anonymous** sign-in is still enabled in the Firebase console (Authentication → Sign-in method). |

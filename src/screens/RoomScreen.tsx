@@ -12,7 +12,7 @@ import { Game, type GameContext } from '../ui/game';
 import { Loading, Logo } from '../app';
 import { JoinForm } from './JoinForm';
 import { GameView } from './GameView';
-import { botsAllowed, startBots } from '../bots/bots';
+import { botsAllowed, runBot, startBots } from '../bots/bots';
 
 type Status = 'loading' | 'ready' | 'missing';
 
@@ -111,7 +111,13 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
 
   const roomRef = useRef(room);
   roomRef.current = room;
-  const engineCtx = useCallback((): engine.Ctx => ({ code, now: now(), pack, history: hostHistory.current }), [code, now, pack]);
+  // Test mode (only with bots allowed): ?fast = 5× shorter timers, ?autoplay = a bot plays my seat.
+  const fast = botsAllowed() && params.has('fast');
+  const autoplay = botsAllowed() && params.has('autoplay');
+  const engineCtx = useCallback(
+    (): engine.Ctx => ({ code, now: now(), pack, history: hostHistory.current, timeScale: fast ? 0.2 : 1 }),
+    [code, now, pack, fast],
+  );
 
   const host = useMemo(
     () => ({
@@ -142,8 +148,22 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
     const n = Number(params.get('bots'));
     if (!isHost || !n || botsStarted.current || room?.state.phase !== 'lobby' || !botsAllowed()) return;
     botsStarted.current = true;
-    void startBots(code, Math.min(n, 9));
+    void startBots(code, Math.min(n, 9), fast ? 4 : 1);
   }, [isHost, room?.state.phase, params.get('bots')]);
+
+  // Test mode: a bot plays my own seat.
+  useEffect(() => {
+    if (!autoplay || !pid || kicked) return;
+    return runBot(fb, code, pid, fast ? 4 : 1, true);
+  }, [autoplay, pid, kicked]);
+
+  // Test mode: the host moves reveals and scoreboards along by itself.
+  useEffect(() => {
+    const phase = room?.state.phase;
+    if (!autoplay || !isHost || !(phase === 'r-reveal' || phase === 'r-end' || phase === 'f-reveal')) return;
+    const id = setTimeout(host.next, fast ? 1500 : 3000);
+    return () => clearTimeout(id);
+  }, [autoplay, isHost, room?.state.v]);
   useWakeLock(status === 'ready' && !!pid && room?.state.phase !== 'end' && !(room?.meta.mode === 'precall' && room?.state.phase === 'truths'));
 
   if (claiming || status === 'loading') return <Loading />;

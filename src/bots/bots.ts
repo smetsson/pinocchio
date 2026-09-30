@@ -4,7 +4,9 @@
  * the security rules treat them exactly like real players.
  *
  * Use: open the host menu in the lobby → "Add 5 bots", or add ?bots=5 to the URL.
- * Available in local development, or on the live site when the URL contains ?bots.
+ * Add &autoplay to let a bot play your own seat too (and move the reveals along),
+ * and &fast for 5× shorter timers: #/r/ABCD?bots=5&autoplay&fast
+ * Available in local development, or on the live site when the URL contains ?bots/autoplay.
  */
 import { getPack } from '../data/packs';
 import { closeFb, makeBotFb, type Fb } from '../data/firebase';
@@ -19,7 +21,7 @@ const NAMES = ['Robo Rita', 'Beep Bart', 'Chip Chloé', 'Gizmo Gert', 'Pixel Pia
 const AVATARS = ['🤖', '👾', '🦾', '🛸', '🧠', '⚙️', '🔋', '📡'];
 
 export function botsAllowed(): boolean {
-  return import.meta.env.DEV || /[?&]bots/.test(location.href);
+  return import.meta.env.DEV || /[?&](bots|autoplay)/.test(location.href);
 }
 
 let running: (() => void)[] = [];
@@ -51,7 +53,8 @@ function pick<T>(items: T[]): T | undefined {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function runBot(fb: Fb, code: string, pid: string, speed: number): () => void {
+/** Let bot logic play a seat. `ownFb` = the phone's own connection (don't close it when stopping). */
+export function runBot(fb: Fb, code: string, pid: string, speed: number, ownFb = false): () => void {
   const pack = () => getPack(room?.meta.pack ?? 'general');
   let room: Room | null = null;
   let pending = '';
@@ -120,7 +123,7 @@ function runBot(fb: Fb, code: string, pid: string, speed: number): () => void {
     room = r;
     if (r) act(r);
   });
-  const unsubPresence = trackPresence(fb, code, pid);
+  const unsubPresence = ownFb ? () => {} : trackPresence(fb, code, pid);
   // Re-check periodically (e.g. prompts dealt after joining).
   const interval = setInterval(() => room && act(room), 3000);
 
@@ -128,6 +131,6 @@ function runBot(fb: Fb, code: string, pid: string, speed: number): () => void {
     clearInterval(interval);
     unsubRoom();
     unsubPresence();
-    void closeFb(fb);
+    if (!ownFb) void closeFb(fb);
   };
 }

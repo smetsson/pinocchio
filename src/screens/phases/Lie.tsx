@@ -25,6 +25,7 @@ export function Lie() {
   const [shakeKey, setShakeKey] = useState(0);
   const [busy, setBusy] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [fromSuggestion, setFromSuggestion] = useState(false);
 
   if (subject === pid) {
     return (
@@ -66,20 +67,31 @@ export function Lie() {
     setBusy(true);
     const ok = await act(lieUpdates(code, pid, q, text));
     setBusy(false);
-    // A write can fail if someone submitted the same lie a split second earlier.
-    if (!ok) fail(t.lie.taken);
-    else (document.activeElement as HTMLElement | null)?.blur();
+    if (ok) {
+      (document.activeElement as HTMLElement | null)?.blur();
+      return;
+    }
+    // Someone locked in the same lie a split second earlier. If it was a "Lie for me"
+    // suggestion, hand them the next one straight away so they're not stuck.
+    if (fromSuggestion && lieForMe(text)) setError(t.lie.raceRefilled);
+    else fail(t.lie.taken);
   };
 
-  const lieForMe = () => {
+  /** Fill in the next suggestion that nobody has used yet. Returns false when out of ideas. */
+  const lieForMe = (skip = text): boolean => {
     const question = room.pub?.questions?.[q];
     const prompt = pack.prompts.find((p) => p.id === question?.promptId);
     let pool = suggestions.length ? suggestions : shuffle(prompt?.lies ?? []);
-    pool = pool.filter((s) => checkLie(room, code, q, s) === 'ok' && s !== text);
-    if (!pool.length) return fail(t.lie.noIdeas);
+    pool = pool.filter((s) => checkLie(room, code, q, s) === 'ok' && s !== skip);
+    if (!pool.length) {
+      fail(t.lie.noIdeas);
+      return false;
+    }
     setText(pool[0]);
+    setFromSuggestion(true);
     setSuggestions(pool.slice(1));
     setError('');
+    return true;
   };
 
   return (
@@ -98,12 +110,13 @@ export function Lie() {
           data-testid="lie-input"
           onInput={(e) => {
             setText((e.target as HTMLInputElement).value);
+            setFromSuggestion(false);
             setError('');
           }}
         />
         {error && <p class="error">{error}</p>}
         <div class="row">
-          <button type="button" class="btn secondary" style={{ flex: 1 }} onClick={lieForMe}>
+          <button type="button" class="btn secondary" style={{ flex: 1 }} onClick={() => lieForMe()}>
             {t.lie.lieForMe}
           </button>
           <button class="btn" style={{ flex: 1 }} disabled={busy || !text.trim()} data-testid="lie-submit">

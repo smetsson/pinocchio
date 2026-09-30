@@ -120,6 +120,7 @@ export const en = {
     lockedHint: 'Waiting for the others…',
     tooClose: "Too close to the truth! Try another one. 😉",
     taken: 'Someone already wrote that one. Try another!',
+    raceRefilled: 'Someone just locked in that exact lie! 😅 Here is a fresh one.',
     noIdeas: "Pinocchio is out of ideas for this one. You'll have to invent it yourself! 😅",
     empty: 'Write something first.',
     tooLong: 'That one is a bit long.',

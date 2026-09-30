@@ -29,6 +29,8 @@ export interface Ctx {
   pack: PromptPack;
   history?: PromptHistory;
   rng?: Rng;
+  /** Test mode: multiply all timers (e.g. 0.2 = five times faster). */
+  timeScale?: number;
 }
 
 const EMPTY_STATS: Stats = { fooled: 0, found: 0, likes: 0, asked: 0, missed: 0 };
@@ -131,7 +133,7 @@ function withState(ctx: Ctx, room: Room, patch: Partial<GameState>, u: Updates =
 }
 
 function deadlineIn(ctx: Ctx, seconds: number): number {
-  return ctx.now + seconds * 1000;
+  return ctx.now + Math.round(seconds * 1000 * (ctx.timeScale ?? 1));
 }
 
 function promptsPerPlayer(): number {
