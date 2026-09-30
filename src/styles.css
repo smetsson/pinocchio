@@ -1264,8 +1264,9 @@ label.field {
   list-style: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   min-height: 32px;
+  position: relative;
 }
 .howto summary::-webkit-details-marker {
   display: none;
@@ -1274,6 +1275,8 @@ label.field {
   content: '▾';
   color: var(--muted);
   transition: transform 0.2s;
+  position: absolute;
+  right: 0;
 }
 .howto[open] summary::after {
   transform: rotate(180deg);
