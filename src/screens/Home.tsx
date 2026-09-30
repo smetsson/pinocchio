@@ -7,6 +7,7 @@ import { go } from '../router';
 import { Logo } from '../app';
 import { cycleTheme } from '../theme';
 import { HowToPlay } from '../ui/HowToPlay';
+import { PinocchioIcon } from '../ui/PinocchioIcon';
 
 export function Home({ fb }: { fb: Fb }) {
   const [code, setCode] = useState('');
@@ -33,8 +34,8 @@ export function Home({ fb }: { fb: Fb }) {
         </button>
       </div>
       <div class="col" style={{ alignItems: 'center', gap: '6px', marginTop: '12px' }}>
-        <div class="big-emoji">🪵</div>
-        <Logo />
+        <PinocchioIcon size={120} class="mascot-hero" />
+        <Logo textOnly />
         <p class="muted center">{t.tagline}</p>
       </div>
 

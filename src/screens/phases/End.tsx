@@ -6,6 +6,7 @@ import { session } from '../../data/session';
 import { go } from '../../router';
 import { Avatar, confetti } from '../../ui/components';
 import { useGame } from '../../ui/game';
+import { Icon } from '../../ui/PinocchioIcon';
 import { Scoreboard } from './Scoreboard';
 
 export function End() {
@@ -52,7 +53,9 @@ export function End() {
               const info = t.end.award[a.id];
               return (
                 <div class="award" key={a.id} style={{ animationDelay: `${2.2 + i * 0.25}s` }}>
-                  <span class="icon">{info.icon}</span>
+                  <span class="icon">
+                    <Icon icon={info.icon} />
+                  </span>
                   <span class="title">{info.title}</span>
                   <div class="row" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
                     {a.pids.map((p) => (

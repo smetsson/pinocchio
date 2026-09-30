@@ -1320,3 +1320,45 @@ label.field {
   margin: 6px 0 0;
   padding-left: 18px;
 }
+
+/* ---------- Pinocchio mascot (public/icon.svg) ---------- */
+.pinocchio-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  user-select: none;
+}
+.mascot-hero {
+  align-self: center;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  animation: mascotFloat 3.5s ease-in-out infinite;
+}
+.logo .wiggle {
+  animation: wiggle 4s ease-in-out infinite;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+}
+@keyframes mascotFloat {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-1deg) translateY(-8px);
+  }
+}
+@keyframes wiggle {
+  0%,
+  80%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  85% {
+    transform: rotate(6deg);
+  }
+  90% {
+    transform: rotate(-8deg);
+  }
+  95% {
+    transform: rotate(4deg);
+  }
+}

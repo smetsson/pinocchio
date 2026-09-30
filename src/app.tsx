@@ -5,6 +5,7 @@ import { useRoute } from './router';
 import { Home } from './screens/Home';
 import { Create } from './screens/Create';
 import { RoomScreen } from './screens/RoomScreen';
+import { PinocchioIcon } from './ui/PinocchioIcon';
 import { BigScreen } from './screens/BigScreen';
 
 export function App() {
@@ -44,11 +45,12 @@ export function App() {
   return <Home fb={fb} />;
 }
 
-export function Logo({ small }: { small?: boolean }) {
+/** "Pinocchio" + the mascot. `textOnly` when the big mascot is already shown above it. */
+export function Logo({ small, textOnly }: { small?: boolean; textOnly?: boolean }) {
   return (
     <div class="logo" style={small ? { fontSize: '26px' } : undefined}>
       <span>{t.appName}</span>
-      <span class="nose">🤥</span>
+      {!textOnly && <PinocchioIcon size="1.05em" class="wiggle" />}
     </div>
   );
 }
@@ -56,7 +58,7 @@ export function Logo({ small }: { small?: boolean }) {
 export function Loading() {
   return (
     <div class="page" style={{ justifyContent: 'center', alignItems: 'center' }}>
-      <div class="big-emoji">🤥</div>
+      <PinocchioIcon size={96} class="mascot-hero" />
       <p class="muted">{t.common.loading}</p>
     </div>
   );

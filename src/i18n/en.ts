@@ -124,7 +124,7 @@ export const en = {
 
   round: {
     intro: {
-      1: { icon: '🤥', subtitle: 'Write believable lies about your colleagues. Then find the truth!' },
+      1: { icon: 'mascot', subtitle: 'Write believable lies about your colleagues. Then find the truth!' },
       2: { icon: '⚡', subtitle: 'Same game, higher stakes.' },
       3: { icon: '🎭', subtitle: 'Truth or Lie: one truth and one lie about yourself. Who can tell them apart?' },
     } as Record<number, { icon: string; subtitle: string }>,
@@ -138,7 +138,7 @@ export const en = {
     placeholder: 'Your lie',
     lieForMe: '🎲 Lie for me',
     submit: 'Lock it in',
-    locked: 'Lie locked in! 🤥',
+    locked: 'Lie locked in!',
     lockedHint: 'Waiting for the others…',
     tooClose: "Too close to the truth! Try another one. 😉",
     taken: 'Someone already wrote that one. Try another!',
@@ -204,7 +204,7 @@ export const en = {
     title: 'And the winner is…',
     awards: 'Awards',
     award: {
-      liar: { title: 'Best Liar', icon: '🤥', desc: (n: number) => `fooled ${n} ${n === 1 ? 'time' : 'times'}` },
+      liar: { title: 'Best Liar', icon: 'mascot', desc: (n: number) => `fooled ${n} ${n === 1 ? 'time' : 'times'}` },
       detector: { title: 'Lie Detector', icon: '🔍', desc: (n: number) => `found the truth ${n} ${n === 1 ? 'time' : 'times'}` },
       favorite: { title: 'Crowd Favourite', icon: '👍', desc: (n: number) => `${n} ${n === 1 ? 'like' : 'likes'}` },
       mystery: { title: 'The Enigma', icon: '🕵️', desc: (n: number) => `${n}% missed their truth` },

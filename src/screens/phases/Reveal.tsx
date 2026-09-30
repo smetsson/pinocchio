@@ -5,6 +5,7 @@ import { currentRound } from '../../logic/engine';
 import type { RevealStep } from '../../logic/types';
 import { Avatar, PlayerMini, confetti } from '../../ui/components';
 import { useGame } from '../../ui/game';
+import { PinocchioIcon } from '../../ui/PinocchioIcon';
 import { QuestionHeader } from './QuestionHeader';
 
 export function Reveal() {
@@ -88,7 +89,7 @@ function RevealCard({ step }: { step: RevealStep }) {
         {step.kind === 'house' && t.reveal.houseLie}
         {step.kind === 'lie' && (
           <>
-            <span class="nose-grow">🤥</span>
+            <PinocchioIcon size={30} class="nose-grow" />
             <Avatar player={author} size="sm" />
             {t.reveal.lieBy(author?.name ?? '?')}
           </>

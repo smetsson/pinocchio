@@ -6,6 +6,7 @@ import { MAX_ANSWER } from '../../logic/normalize';
 import { shuffle } from '../../logic/random';
 import { WaitingFor } from '../../ui/components';
 import { useGame } from '../../ui/game';
+import { PinocchioIcon } from '../../ui/PinocchioIcon';
 import { QuestionHeader } from './QuestionHeader';
 
 const MESSAGES: Record<Exclude<LieCheck, 'ok'>, string> = {
@@ -46,7 +47,7 @@ export function Lie() {
       <>
         <QuestionHeader fill={myLie} />
         <div class="card center col pop-in">
-          <div class="big-emoji">🤥</div>
+          <PinocchioIcon size={88} class="mascot-hero" />
           <h2>{t.lie.locked}</h2>
           <p class="muted">{t.lie.lockedHint}</p>
         </div>
