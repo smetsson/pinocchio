@@ -129,9 +129,9 @@ Prompt packs are simple JSON files in the [`prompts/`](prompts/) folder. The gam
 - `them`: the same question about someone else, with `{name}` and `____`.
 - `lies`: 3–6 believable fake answers, used by **🎲 Lie for me** and to fill in when few people lied.
 - Keep it light and work-friendly: no health, relationships, money or politics.
-- **Standard pack size: 25 questions** (a test checks this, so a smaller pack won't deploy). A 6-player game plays ± 8 questions and deals 5 per player, so 25 gives about 3 games before questions repeat for your group.
+- **Standard pack size: 50 questions** (a test checks this, so a smaller pack won't deploy). Every player is dealt 5 questions (2 to answer + 3 spares), and a room holds up to 10 players, so 50 guarantees nobody in a game gets the same question as someone else. A 6-player game plays ± 8 questions, so a pack lasts about 6 games before questions repeat for your group.
 
-**Included packs:** 🎲 General (100 questions), 🔮 What if? (50), 🏖️ Holidays & travel (25), 🎒 Throwback (25), 🍕 Food fight (25)
+**Included packs:** 🎲 General (100 questions), 🔮 What if? (50), 🏖️ Holidays & travel (50), 🎒 Throwback (50), 🍕 Food fight (50)
 
 The **"questions not played yet"** counter on the *Create room* screen tells you when a pack is running low for the selected group. **Reset history** makes all of its questions "fresh" again for that group.
 

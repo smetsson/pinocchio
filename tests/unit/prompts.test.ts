@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { countFresh, dealPrompts, freshestFirst, groupKey } from '../../src/logic/prompts';
 import { seeded } from '../../src/logic/random';
 import { PACKS, getPack } from '../../src/data/packs';
+import { GAME } from '../../src/config/game';
 
 describe('prompt packs', () => {
   it('are valid', () => {
@@ -15,8 +16,11 @@ describe('prompt packs', () => {
         expect(p.them, p.id).toContain('____');
         expect(p.lies.length, p.id).toBeGreaterThanOrEqual(3);
       }
-      // Standard pack size: 25 questions.
-      expect(pack.prompts.length, `${pack.id} has fewer than 25 questions`).toBeGreaterThanOrEqual(25);
+      // Standard pack size: 50 questions. That's enough to deal every player in a full room
+      // their own questions, so no question can come up twice in one game.
+      expect(pack.prompts.length, `${pack.id} has fewer than 50 questions`).toBeGreaterThanOrEqual(50);
+      const dealtInFullRoom = GAME.maxPlayers * (GAME.truthsPerPlayer + GAME.sparePromptsPerPlayer);
+      expect(pack.prompts.length, `${pack.id} is too small for a full room`).toBeGreaterThanOrEqual(dealtInFullRoom);
     }
     expect(getPack('general').prompts.length).toBeGreaterThanOrEqual(100);
     expect(getPack('what-if').prompts.length).toBeGreaterThanOrEqual(50);
