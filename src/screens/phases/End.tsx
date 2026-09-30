@@ -9,7 +9,7 @@ import { useGame } from '../../ui/game';
 import { Scoreboard } from './Scoreboard';
 
 export function End() {
-  const { room, isHost, fb, code } = useGame();
+  const { room, isHost, fb, code, spectator } = useGame();
   const rows = standings(room);
   const [deleted, setDeleted] = useState(false);
 
@@ -87,15 +87,17 @@ export function End() {
           {t.end.deleteNow}
         </button>
       )}
-      <button
-        class="btn"
-        onClick={() => {
-          session.forget(code);
-          go(isHost ? '/new' : '/');
-        }}
-      >
-        {t.end.newGame}
-      </button>
+      {!spectator && (
+        <button
+          class="btn"
+          onClick={() => {
+            session.forget(code);
+            go(isHost ? '/new' : '/');
+          }}
+        >
+          {t.end.newGame}
+        </button>
+      )}
     </>
   );
 }

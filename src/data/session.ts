@@ -12,6 +12,8 @@ interface Stored {
   name?: string;
   avatar?: string;
   theme?: 'light' | 'dark' | 'auto';
+  /** Group names used on this phone, most recent first. */
+  groups?: string[];
 }
 
 function read(): Stored {
@@ -55,6 +57,14 @@ export const session = {
   },
   saveProfile(name: string, avatar: string) {
     write({ ...read(), name, avatar });
+  },
+  groups(): string[] {
+    return read().groups ?? [];
+  },
+  useGroup(name: string) {
+    const s = read();
+    s.groups = [name, ...(s.groups ?? []).filter((g) => g.toLowerCase() !== name.toLowerCase())].slice(0, 8);
+    write(s);
   },
   theme(): 'light' | 'dark' | 'auto' {
     return read().theme ?? 'auto';

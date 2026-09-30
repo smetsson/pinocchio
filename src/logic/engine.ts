@@ -5,7 +5,7 @@
 import { GAME, TIMERS } from '../config/game';
 import { SCORING } from '../config/scoring';
 import { answerHash, normalize } from './normalize';
-import { dealPrompts, type PromptHistory } from './prompts';
+import { dealPrompts, historyPath, type PromptHistory } from './prompts';
 import { randomId, shuffle, type Rng } from './random';
 import type {
   Award,
@@ -201,7 +201,7 @@ export function planQuestions(room: Room, ctx: Ctx): Question[] {
 
 function startQuestion(room: Room, ctx: Ctx, q: number, u: Updates = {}): Updates {
   const question = room.pub!.questions![q];
-  u[`history/${room.meta.pack}/${question.promptId}`] = ctx.now;
+  u[`${historyPath(room.meta.group ?? 'default', room.meta.pack)}/${question.promptId}`] = ctx.now;
   return withState(ctx, room, { phase: 'r-lie', q, deadline: deadlineIn(ctx, TIMERS.lie) }, u);
 }
 
@@ -364,7 +364,7 @@ export function startFinalPicks(room: Room, ctx: Ctx): Updates {
   const subjects = shuffle(
     activePids(room).filter((pid) => {
       const f = room.priv?.[pid]?.final;
-      return f?.truth?.trim() && f?.fib?.trim();
+      return f?.truth?.trim() && f?.lie?.trim();
     }),
     ctx.rng,
   );
@@ -374,7 +374,7 @@ export function startFinalPicks(room: Room, ctx: Ctx): Updates {
   subjects.forEach((pid, i) => {
     const f = room.priv![pid].final!;
     const truthFirst = (ctx.rng ?? Math.random)() < 0.5;
-    final.push({ subject: pid, options: truthFirst ? [f.truth.trim(), f.fib.trim()] : [f.fib.trim(), f.truth.trim()] });
+    final.push({ subject: pid, options: truthFirst ? [f.truth.trim(), f.lie.trim()] : [f.lie.trim(), f.truth.trim()] });
     finalTruth[i] = truthFirst ? 0 : 1;
   });
   const u: Updates = {

@@ -1,0 +1,33 @@
+{
+  "id": "what-if",
+  "name": "What if?",
+  "emoji": "🔮",
+  "description": "Zombie weapons, clones, time travel and other wild hypotheticals.",
+  "prompts": [
+    {"id": "zombie-weapon", "me": "My weapon of choice in a zombie apocalypse would be ____", "them": "{name}'s weapon of choice in a zombie apocalypse would be ____", "lies": ["a frying pan", "a cricket bat", "a garden rake", "a leaf blower"]},
+    {"id": "desert-island", "me": "The one item I'd take to a desert island is ____", "them": "The one item {name} would take to a desert island is ____", "lies": ["a Swiss army knife", "a solar charger", "a guitar", "a hammock"]},
+    {"id": "time-travel", "me": "If I could time-travel for one day, I'd go to ____", "them": "If {name} could time-travel for one day, they'd go to ____", "lies": ["the dinosaurs", "the first Moon landing", "ancient Egypt", "Woodstock 1969"]},
+    {"id": "invisible-day", "me": "If I were invisible for a day, I'd ____", "them": "If {name} were invisible for a day, they'd ____", "lies": ["sneak into a sold-out concert", "sit in on a board meeting", "raid a fancy buffet", "prank my colleagues"]},
+    {"id": "famous-for", "me": "If I became famous, it would be for ____", "them": "If {name} became famous, it would be for ____", "lies": ["a viral cooking video", "an accidental world record", "a hit song", "a terrible reality show"]},
+    {"id": "biopic-actor", "me": "The actor who'd play me in a movie is ____", "them": "The actor who'd play {name} in a movie is ____", "lies": ["Tom Hanks", "Emma Stone", "Matthias Schoenaerts", "Rowan Atkinson"]},
+    {"id": "talking-animal", "me": "If animals could talk, I'd most like to chat with ____", "them": "If animals could talk, {name} would most like to chat with ____", "lies": ["a dolphin", "a crow", "my neighbour's cat", "an elephant"]},
+    {"id": "first-rule", "me": "If I ran the world for a day, my first rule would be ____", "them": "If {name} ran the world for a day, their first rule would be ____", "lies": ["free fries on Fridays", "no meetings before 10", "a nap break for everyone", "dogs allowed everywhere"]},
+    {"id": "extra-hour", "me": "If every day had an extra hour, I'd spend it ____", "them": "If every day had an extra hour, {name} would spend it ____", "lies": ["sleeping", "reading", "practising guitar", "gaming"]},
+    {"id": "robot-butler", "me": "If I had a robot butler, its first job would be ____", "them": "If {name} had a robot butler, its first job would be ____", "lies": ["ironing", "folding laundry", "making coffee", "doing the dishes"]},
+    {"id": "entrance-theme", "me": "The theme song that plays when I enter a room is ____", "them": "The theme song that plays when {name} enters a room is ____", "lies": ["the Jaws theme", "the Rocky theme", "Mission Impossible", "the Pink Panther"]},
+    {"id": "swap-lives", "me": "For one week, I'd swap lives with ____", "them": "For one week, {name} would swap lives with ____", "lies": ["an astronaut", "a lighthouse keeper", "a Formula 1 driver", "my cat"]},
+    {"id": "tiny-superpower", "me": "The most useless superpower I'd love to have is ____", "them": "The most useless superpower {name} would love to have is ____", "lies": ["always finding a parking spot", "perfectly ripe avocados", "never getting hiccups", "folding laundry instantly"]},
+    {"id": "museum-exhibit", "me": "In a museum about me, the main exhibit would be ____", "them": "In a museum about {name}, the main exhibit would be ____", "lies": ["my mug collection", "my old school reports", "a wax figure of me napping", "my sneaker collection"]},
+    {"id": "win-reality-show", "me": "The reality show I would win is ____", "them": "The reality show {name} would win is ____", "lies": ["Survivor", "The Great British Bake Off", "Big Brother", "Ninja Warrior"]},
+    {"id": "clone-task", "me": "If I had a clone, I'd send it to ____", "them": "If {name} had a clone, they'd send it to ____", "lies": ["all my meetings", "the gym", "family parties", "the supermarket"]},
+    {"id": "space-item", "me": "If I went to space, the one thing I'd bring is ____", "them": "If {name} went to space, the one thing they'd bring is ____", "lies": ["a pillow", "speculoos", "my camera", "a rubber duck"]},
+    {"id": "invent-flavour", "me": "If I could invent an ice cream flavour, it would be ____", "them": "If {name} could invent an ice cream flavour, it would be ____", "lies": ["speculoos & sea salt", "bacon & maple", "waffle dough", "mojito"]},
+    {"id": "job-for-a-day", "me": "The job I'd try for just one day is ____", "them": "The job {name} would try for just one day is ____", "lies": ["zookeeper", "pilot", "chocolatier", "news anchor"]},
+    {"id": "era-fashion", "me": "If I had to dress in one decade's fashion forever, I'd pick ____", "them": "If {name} had to dress in one decade's fashion forever, they'd pick ____", "lies": ["the 70s", "the 90s", "the 1920s", "the 80s"]},
+    {"id": "sidekick", "me": "If I were a superhero, my sidekick would be ____", "them": "If {name} were a superhero, their sidekick would be ____", "lies": ["a sarcastic parrot", "my mum", "a golden retriever", "a talking toaster"]},
+    {"id": "survival-skill", "me": "In a survival situation, my most useful skill would be ____", "them": "In a survival situation, {name}'s most useful skill would be ____", "lies": ["making fire", "cooking anything", "staying calm", "finding the nearest fries shop"]},
+    {"id": "magic-button", "me": "If I had one magic button, it would ____", "them": "If {name} had one magic button, it would ____", "lies": ["skip every queue", "clean my house", "make Mondays optional", "teleport me home"]},
+    {"id": "statue-pose", "me": "If they built a statue of me, I'd be ____", "them": "If they built a statue of {name}, they'd be ____", "lies": ["holding a coffee", "pointing dramatically", "riding a horse", "taking a selfie"]},
+    {"id": "team-mascot", "me": "I think our team's mascot should be ____", "them": "{name} thinks our team's mascot should be ____", "lies": ["a sloth", "a rubber duck", "a llama", "a coffee bean"]}
+  ]
+}

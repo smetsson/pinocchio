@@ -30,6 +30,9 @@
           "mode": {
             ".validate": "newData.val() === 'live' || newData.val() === 'precall'"
           },
+          "group": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60"
+          },
           "$other": {
             ".validate": false
           }
@@ -122,11 +125,11 @@
             },
             "final": {
               ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && root.child('rooms/' + $code + '/state/phase').val() === 'f-write'",
-              ".validate": "newData.hasChildren(['truth', 'fib'])",
+              ".validate": "newData.hasChildren(['truth', 'lie'])",
               "truth": {
                 ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
               },
-              "fib": {
+              "lie": {
                 ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
               },
               "$other": {
@@ -188,11 +191,13 @@
     },
     "history": {
       ".read": "auth != null",
-      "$pack": {
-        ".write": "auth != null && !newData.exists()",
-        "$prompt": {
-          ".write": "auth != null",
-          ".validate": "newData.isNumber()"
+      "$group": {
+        "$pack": {
+          ".write": "auth != null && !newData.exists()",
+          "$prompt": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber()"
+          }
         }
       }
     }

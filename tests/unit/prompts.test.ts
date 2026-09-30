@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { countFresh, dealPrompts, freshestFirst } from '../../src/logic/prompts';
+import { countFresh, dealPrompts, freshestFirst, groupKey } from '../../src/logic/prompts';
 import { seeded } from '../../src/logic/random';
 import { PACKS, getPack } from '../../src/data/packs';
 
 describe('prompt packs', () => {
   it('are valid', () => {
-    expect(PACKS.length).toBeGreaterThanOrEqual(2);
+    expect(PACKS.length).toBeGreaterThanOrEqual(5);
     for (const pack of PACKS) {
       const ids = pack.prompts.map((p) => p.id);
       expect(new Set(ids).size, `duplicate ids in ${pack.id}`).toBe(ids.length);
@@ -16,7 +16,16 @@ describe('prompt packs', () => {
         expect(p.lies.length, p.id).toBeGreaterThanOrEqual(3);
       }
     }
-    expect(getPack('general').prompts.length).toBeGreaterThanOrEqual(60);
+    expect(getPack('general').prompts.length).toBeGreaterThanOrEqual(100);
+  });
+});
+
+describe('groups', () => {
+  it('turns group names into safe keys', () => {
+    expect(groupKey('Work Team!')).toBe('work-team');
+    expect(groupKey('  Vrienden & Co ')).toBe('vrienden-co');
+    expect(groupKey('Café.$#[]/')).toBe('cafe');
+    expect(groupKey('!!!')).toBe('default');
   });
 });
 

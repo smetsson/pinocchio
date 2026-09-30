@@ -28,7 +28,7 @@ export function FinalWrite() {
   const { room, pid, code, act } = useGame();
   const saved = room.priv?.[pid]?.final;
   const [truth, setTruth] = useState(saved?.truth ?? '');
-  const [fib, setFib] = useState(saved?.fib ?? '');
+  const [lie, setLie] = useState(saved?.lie ?? '');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -47,12 +47,12 @@ export function FinalWrite() {
 
   const submit = async (e: Event) => {
     e.preventDefault();
-    const check = checkFinal(truth, fib);
+    const check = checkFinal(truth, lie);
     if (check === 'same') return setError(t.final.same);
     if (check === 'too-long') return setError(t.lie.tooLong);
     if (check !== 'ok') return setError(t.lie.empty);
     setBusy(true);
-    await act(finalUpdates(code, pid, truth, fib));
+    await act(finalUpdates(code, pid, truth, lie));
     setBusy(false);
   };
 
@@ -66,11 +66,11 @@ export function FinalWrite() {
         <input value={truth} maxLength={MAX_ANSWER} placeholder={t.final.truthPlaceholder} data-testid="final-truth" onInput={(e) => setTruth((e.target as HTMLInputElement).value)} />
       </label>
       <label class="field">
-        🤥 {t.final.fib}
-        <input value={fib} maxLength={MAX_ANSWER} placeholder={t.final.fibPlaceholder} data-testid="final-fib" onInput={(e) => setFib((e.target as HTMLInputElement).value)} />
+        🤥 {t.final.lie}
+        <input value={lie} maxLength={MAX_ANSWER} placeholder={t.final.liePlaceholder} data-testid="final-lie" onInput={(e) => setLie((e.target as HTMLInputElement).value)} />
       </label>
       {error && <p class="error shake">{error}</p>}
-      <button class="btn" disabled={busy || !truth.trim() || !fib.trim()} data-testid="final-submit">
+      <button class="btn" disabled={busy || !truth.trim() || !lie.trim()} data-testid="final-submit">
         {t.final.submit}
       </button>
       <WaitingFor onlyMissing />
@@ -79,7 +79,7 @@ export function FinalWrite() {
 }
 
 export function FinalPick() {
-  const { room, pid, code, act } = useGame();
+  const { room, pid, code, act, spectator } = useGame();
   const i = room.state.q;
   const fq = room.pub?.final?.[i];
   if (!fq) return null;
@@ -91,7 +91,7 @@ export function FinalPick() {
       <FinalHeader />
       <div class="card subject-banner">
         <Avatar player={subject} size="lg" />
-        <h2>{isSubject ? t.final.subjectTitle : t.final.pickTitle(subject?.name ?? '')}</h2>
+        <h2>{isSubject && !spectator ? t.final.subjectTitle : t.final.pickTitle(subject?.name ?? '')}</h2>
       </div>
       {isSubject && <p class="muted center">{t.final.subjectHint}</p>}
       <div class="tf-grid" data-testid="tf-options">
@@ -100,7 +100,7 @@ export function FinalPick() {
             key={idx}
             class={`tf-option slide-up ${vote === idx ? 'selected' : ''}`}
             style={{ animationDelay: `${idx * 0.1}s` }}
-            disabled={isSubject}
+            disabled={isSubject || spectator}
             onClick={() => {
               buzz(20);
               void act(finalVoteUpdates(code, pid, i, idx as 0 | 1));
@@ -143,8 +143,8 @@ export function FinalReveal() {
         {fq.options.map((text, idx) => {
           const isTrue = idx === fr.truthIndex;
           return (
-            <div key={`${idx}-${shown}`} class={`tf-option ${shown ? (isTrue ? 'is-true' : 'is-fib') : ''}`}>
-              {shown && <span class="stamp" style={{ '--stamp-delay': '0s', ...(isTrue ? {} : { color: 'var(--lie)', borderColor: 'var(--lie)' }) }}>{isTrue ? t.final.trueLabel : t.final.fibLabel}</span>}
+            <div key={`${idx}-${shown}`} class={`tf-option ${shown ? (isTrue ? 'is-true' : 'is-lie') : ''}`}>
+              {shown && <span class="stamp" style={{ '--stamp-delay': '0s', ...(isTrue ? {} : { color: 'var(--lie)', borderColor: 'var(--lie)' }) }}>{isTrue ? t.final.trueLabel : t.final.lieLabel}</span>}
               <span>{text}</span>
               <div class="pickers">
                 {votersFor(idx).map((p, k) => (

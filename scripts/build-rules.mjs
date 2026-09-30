@@ -49,6 +49,7 @@ const rules = {
           pack: { '.validate': str(40) },
           length: { '.validate': "newData.val() === 'short' || newData.val() === 'standard'" },
           mode: { '.validate': "newData.val() === 'live' || newData.val() === 'precall'" },
+          group: { '.validate': str(60) },
           $other: { '.validate': false },
         },
         players: {
@@ -111,9 +112,9 @@ const rules = {
             },
             final: {
               '.write': `${me} && ${phase('f-write')}`,
-              '.validate': "newData.hasChildren(['truth', 'fib'])",
+              '.validate': "newData.hasChildren(['truth', 'lie'])",
               truth: { '.validate': str(100) },
-              fib: { '.validate': str(100) },
+              lie: { '.validate': str(100) },
               $other: { '.validate': false },
             },
             fvotes: {
@@ -170,12 +171,14 @@ const rules = {
         '.validate': 'newData.isNumber()',
       },
     },
-    // When each prompt was last played, so the team doesn't see repeats. Contains no answers.
+    // When each prompt was last played, per group, so a group doesn't see repeats. Contains no answers.
     history: {
       '.read': signedIn,
-      $pack: {
-        '.write': `${signedIn} && !newData.exists()`,
-        $prompt: { '.write': signedIn, '.validate': 'newData.isNumber()' },
+      $group: {
+        $pack: {
+          '.write': `${signedIn} && !newData.exists()`,
+          $prompt: { '.write': signedIn, '.validate': 'newData.isNumber()' },
+        },
       },
     },
   },

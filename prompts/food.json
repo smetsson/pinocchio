@@ -1,0 +1,33 @@
+{
+  "id": "food",
+  "name": "Food fight",
+  "emoji": "🍕",
+  "description": "Guilty snacks, kitchen disasters and questionable combos.",
+  "prompts": [
+    {"id": "guilty-food", "me": "My guilty-pleasure food is ____", "them": "{name}'s guilty-pleasure food is ____", "lies": ["cold fries", "instant noodles", "Nutella straight from the jar", "cheese strings"]},
+    {"id": "one-dish-year", "me": "If I could only eat one dish for a year, it would be ____", "them": "If {name} could only eat one dish for a year, it would be ____", "lies": ["pizza", "sushi", "stoofvlees with fries", "pad thai"]},
+    {"id": "pizza-topping", "me": "My favourite pizza topping is ____", "them": "{name}'s favourite pizza topping is ____", "lies": ["pineapple", "anchovies", "salami", "truffle"]},
+    {"id": "kitchen-disaster", "me": "My biggest kitchen disaster was ____", "them": "{name}'s biggest kitchen disaster was ____", "lies": ["setting a pan on fire", "an egg exploding in the microwave", "salt instead of sugar in a cake", "a very black lasagne"]},
+    {"id": "go-to-sauce", "me": "The sauce I put on everything is ____", "them": "The sauce {name} puts on everything is ____", "lies": ["andalouse", "sriracha", "mayonnaise", "samurai sauce"]},
+    {"id": "coffee-order", "me": "My usual coffee order is ____", "them": "{name}'s usual coffee order is ____", "lies": ["a flat white", "black, no sugar", "a caramel latte", "tea, obviously"]},
+    {"id": "food-combo", "me": "My weirdest food combination is ____", "them": "{name}'s weirdest food combination is ____", "lies": ["fries dipped in a milkshake", "peanut butter and pickles", "cheese with jam", "a sandwich with crisps inside"]},
+    {"id": "childhood-dish", "me": "The dish that reminds me most of my childhood is ____", "them": "The dish that reminds {name} most of their childhood is ____", "lies": ["grandma's soup", "vol-au-vent", "spaghetti on Wednesday", "rice pudding"]},
+    {"id": "favourite-sweets", "me": "My favourite sweets are ____", "them": "{name}'s favourite sweets are ____", "lies": ["Haribo Tangfastics", "Kinder Bueno", "Mentos", "liquorice"]},
+    {"id": "strangest-restaurant", "me": "The strangest restaurant I've ever eaten at was ____", "them": "The strangest restaurant {name} has ever eaten at was ____", "lies": ["a restaurant in total darkness", "a prison-themed restaurant", "a treehouse restaurant", "a cat café"]},
+    {"id": "bbq-role", "me": "At a barbecue, I'm the one who ____", "them": "At a barbecue, {name} is the one who ____", "lies": ["guards the grill", "makes all the salads", "only brings crisps", "eats all the sausages"]},
+    {"id": "midnight-snack", "me": "My go-to midnight snack is ____", "them": "{name}'s go-to midnight snack is ____", "lies": ["a cheese sandwich", "a bowl of cereal", "leftover pasta", "a spoonful of peanut butter"]},
+    {"id": "party-drink", "me": "My go-to drink at a party is ____", "them": "{name}'s go-to drink at a party is ____", "lies": ["a gin tonic", "sparkling water", "a Duvel", "a mojito"]},
+    {"id": "cooking-show", "me": "If I were on a cooking show, I'd make ____", "them": "If {name} were on a cooking show, they'd make ____", "lies": ["a three-course waffle menu", "steak tartare", "a chocolate fondant", "my famous chili"]},
+    {"id": "favourite-fruit", "me": "My favourite fruit is ____", "them": "{name}'s favourite fruit is ____", "lies": ["mango", "watermelon", "raspberries", "a crunchy apple"]},
+    {"id": "favourite-cuisine", "me": "My favourite cuisine is ____", "them": "{name}'s favourite cuisine is ____", "lies": ["Japanese", "Italian", "Lebanese", "Mexican"]},
+    {"id": "kitchen-gadget", "me": "The kitchen gadget I use the most is ____", "them": "The kitchen gadget {name} uses the most is ____", "lies": ["the air fryer", "a waffle iron", "the microwave", "a garlic press"]},
+    {"id": "never-dared", "me": "A food I've never dared to try is ____", "them": "A food {name} has never dared to try is ____", "lies": ["snails", "durian", "blue cheese", "oysters"]},
+    {"id": "eating-habit", "me": "My weird eating habit is ____", "them": "{name}'s weird eating habit is ____", "lies": ["sorting fries by size", "never letting food touch on my plate", "eating dessert first", "dunking everything in coffee"]},
+    {"id": "crisps-flavour", "me": "My favourite crisps flavour is ____", "them": "{name}'s favourite crisps flavour is ____", "lies": ["paprika", "salt & vinegar", "pickles", "bolognese"]},
+    {"id": "birthday-cake", "me": "My ideal birthday cake is ____", "them": "{name}'s ideal birthday cake is ____", "lies": ["chocolate mousse cake", "carrot cake", "a big cheesecake", "a tower of donuts"]},
+    {"id": "coffee-count", "me": "I drink about ____ cups of coffee a day", "them": "{name} drinks about ____ cups of coffee a day", "lies": ["2", "0", "5", "7"]},
+    {"id": "fast-food-order", "me": "My go-to fast food order is ____", "them": "{name}'s go-to fast food order is ____", "lies": ["a Big Mac menu", "a Whopper", "a bicky burger", "a durum"]},
+    {"id": "best-cooked", "me": "The best thing I've ever cooked is ____", "them": "The best thing {name} has ever cooked is ____", "lies": ["a Beef Wellington", "homemade pasta", "paella for 20 people", "macarons"]},
+    {"id": "spice-level", "me": "On a spice scale from 1 to 10, I can handle ____", "them": "On a spice scale from 1 to 10, {name} can handle ____", "lies": ["2, maybe", "10, bring it on", "5", "7"]}
+  ]
+}

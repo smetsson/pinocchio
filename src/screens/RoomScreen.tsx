@@ -92,7 +92,7 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
   }, [fb, code, pid, kicked]);
 
   const pack = getPack(room?.meta.pack ?? 'general');
-  const hostHistory = useHostHistory(fb, isHost ? pack.id : undefined);
+  const hostHistory = useHostHistory(fb, room?.meta.group ?? 'default', isHost ? pack.id : undefined);
 
   const act = useCallback(
     async (u: Updates) => {
@@ -197,12 +197,12 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
   );
 }
 
-function useHostHistory(fb: Fb, pack: string | undefined) {
+function useHostHistory(fb: Fb, group: string, pack: string | undefined) {
   const ref = useRef<PromptHistory>({});
   useEffect(() => {
     if (!pack) return;
-    return watchHistory(fb, pack, (h) => (ref.current = h));
-  }, [fb, pack]);
+    return watchHistory(fb, group, pack, (h) => (ref.current = h));
+  }, [fb, group, pack]);
   return ref;
 }
 
@@ -231,7 +231,7 @@ function useHostLoop(enabled: boolean, roomRef: { current: Room | null }, ctx: (
 }
 
 /** Keep the screen on during the game (phones that lock drop their connection). */
-function useWakeLock(enabled: boolean) {
+export function useWakeLock(enabled: boolean) {
   useEffect(() => {
     if (!enabled || !('wakeLock' in navigator)) return;
     let lock: WakeLockSentinel | null = null;

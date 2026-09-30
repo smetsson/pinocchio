@@ -9,6 +9,8 @@ export interface GameContext {
   room: Room;
   pid: string;
   isHost: boolean;
+  /** Big-screen view: watches the game, never plays. */
+  spectator?: boolean;
   pack: PromptPack;
   /** Server-synced clock (ms). */
   now: () => number;

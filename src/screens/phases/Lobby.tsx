@@ -2,7 +2,7 @@ import { useState } from 'preact/hooks';
 import { t } from '../../i18n';
 import { GAME } from '../../config/game';
 import { activePids, isAway } from '../../logic/engine';
-import { joinLink } from '../../router';
+import { joinLink, screenLink } from '../../router';
 import { Avatar, QR, shareOrCopy } from '../../ui/components';
 import { useGame } from '../../ui/game';
 
@@ -32,6 +32,11 @@ export function Lobby() {
         >
           📤 {shared ? t.common.copied : t.lobby.shareTitle}
         </button>
+        {isHost && (
+          <a class="btn ghost" href={screenLink(code)} target="_blank" rel="noopener">
+            {t.screen.link}
+          </a>
+        )}
       </div>
 
       <div class="row">

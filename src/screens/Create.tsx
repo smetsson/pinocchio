@@ -14,6 +14,7 @@ export function Create({ fb }: { fb: Fb }) {
   const profile = session.profile();
   const [name, setName] = useState(profile.name);
   const [avatar, setAvatar] = useState(profile.avatar || AVATARS[0]);
+  const [group, setGroup] = useState(session.groups()[0] ?? t.create.defaultGroup);
   const [pack, setPack] = useState(PACKS[0].id);
   const [length, setLength] = useState<Meta['length']>('standard');
   const [mode, setMode] = useState<Meta['mode']>('live');
@@ -21,7 +22,8 @@ export function Create({ fb }: { fb: Fb }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => watchHistory(fb, pack, setHistory), [fb, pack]);
+  const groupName = group.trim() || t.create.defaultGroup;
+  useEffect(() => watchHistory(fb, groupName, pack, setHistory), [fb, groupName, pack]);
 
   const selected = getPack(pack);
   const fresh = countFresh(selected, history);
@@ -32,7 +34,8 @@ export function Create({ fb }: { fb: Fb }) {
     setBusy(true);
     try {
       session.saveProfile(name.trim(), avatar);
-      const { code, pid, hostKey } = await createRoom(fb, { name: name.trim(), avatar, pack, length, mode });
+      session.useGroup(groupName);
+      const { code, pid, hostKey } = await createRoom(fb, { name: name.trim(), avatar, pack, length, mode, group: groupName });
       session.saveSeat(code, { pid, hostKey });
       go(`/r/${code}`);
     } catch {
@@ -63,6 +66,19 @@ export function Create({ fb }: { fb: Fb }) {
         <AvatarPicker value={avatar} onChange={setAvatar} />
       </div>
 
+      <label class="field">
+        {t.create.group}
+        <input value={group} maxLength={40} list="groups" placeholder={t.create.groupPlaceholder} onInput={(e) => setGroup((e.target as HTMLInputElement).value)} />
+        <datalist id="groups">
+          {session.groups().map((g) => (
+            <option key={g} value={g} />
+          ))}
+        </datalist>
+        <span class="small muted" style={{ fontWeight: 400 }}>
+          {t.create.groupHint}
+        </span>
+      </label>
+
       <div class="col">
         <b>{t.create.pack}</b>
         <Seg
@@ -74,7 +90,7 @@ export function Create({ fb }: { fb: Fb }) {
         <p class="small muted">
           {fresh > 0 ? t.create.freshLeft(fresh, selected.prompts.length) : t.create.allPlayed}{' '}
           {fresh < selected.prompts.length && (
-            <button type="button" class="btn ghost small" style={{ display: 'inline', padding: 0, minHeight: 0 }} onClick={() => confirm(t.create.resetConfirm) && resetHistory(fb, pack)}>
+            <button type="button" class="btn ghost small" style={{ display: 'inline', padding: 0, minHeight: 0 }} onClick={() => confirm(t.create.resetConfirm) && resetHistory(fb, groupName, pack)}>
               {t.create.resetHistory}
             </button>
           )}

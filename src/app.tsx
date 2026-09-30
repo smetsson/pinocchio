@@ -5,6 +5,7 @@ import { useRoute } from './router';
 import { Home } from './screens/Home';
 import { Create } from './screens/Create';
 import { RoomScreen } from './screens/RoomScreen';
+import { BigScreen } from './screens/BigScreen';
 
 export function App() {
   const route = useRoute();
@@ -38,6 +39,7 @@ export function App() {
   }
   if (!fb) return <Loading />;
   if (route.name === 'new') return <Create fb={fb} />;
+  if (route.name === 'screen' && route.code) return <BigScreen key={route.code} fb={fb} code={route.code} />;
   if (route.name === 'room' && route.code) return <RoomScreen key={route.code} fb={fb} code={route.code} params={route.params} />;
   return <Home fb={fb} />;
 }

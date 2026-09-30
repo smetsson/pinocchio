@@ -8,7 +8,7 @@ export const TIMERS = {
   lie: 75,
   /** Picking the truth (+ liking a lie). */
   pick: 35,
-  /** Final round: write one truth and one fib about yourself. */
+  /** Final round: write one truth and one lie about yourself. */
   finalWrite: 90,
   /** Final round: guess which one is true. */
   finalPick: 20,

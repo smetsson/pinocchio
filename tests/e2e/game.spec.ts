@@ -8,9 +8,16 @@ test('three phones play a full game from lobby to podium', async ({ browser, bro
   const pages: Page[] = [host, ann, bob];
 
   const code = await createRoom(host, 'Hostie', { short: true });
+  // A laptop showing the big-screen view (watches only, doesn't join).
+  const screenCtx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const screen = await screenCtx.newPage();
+  await screen.goto(`/#/screen/${code}`);
+  await expect(screen.locator('.room-code')).toHaveText(code);
+
   await joinRoom(ann, code, 'Ann');
   await joinRoom(bob, code, 'Bob');
   await expect(host.getByTestId('players').locator('.player')).toHaveCount(3);
+  await expect(screen.locator('.player')).toHaveCount(3);
 
   await host.getByTestId('host-next').click(); // Start game
   await expect(host.getByText('Tell the truth!')).toBeVisible();
@@ -34,6 +41,9 @@ test('three phones play a full game from lobby to podium', async ({ browser, bro
   for (const page of pages) await expect(page.getByTestId('podium')).toBeVisible();
   for (const label of ['truths', 'lie', 'pick', 'next', 'final-write', 'final-pick']) expect(seen, `never did: ${label}`).toContain(label);
   await expect(host.getByTestId('scoreboard').locator('.points-row')).toHaveCount(3);
+  await expect(screen.getByTestId('podium')).toBeVisible();
+  await expect(screen.getByRole('button', { name: 'New game' })).toHaveCount(0);
+  await screenCtx.close();
   void browserName;
   await Promise.all(contexts.map((c) => c.close()));
 });

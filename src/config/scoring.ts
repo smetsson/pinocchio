@@ -14,6 +14,6 @@ export const SCORING = {
   multiplier: {
     1: 1, // Round 1
     2: 2, // Round 2
-    3: 2, // Final round: Truth or Fib
+    3: 2, // Final round: Truth or Lie
   } as Record<number, number>,
 };

@@ -76,7 +76,7 @@ describe('engine: full game', () => {
       expect(new Set(subjects).size).toBe(subjects.length);
     }
     // Played prompts are remembered for next month.
-    expect(sim.db.history.general[questions[0].promptId]).toBe(sim.now);
+    expect(sim.db.history['work-team'].general[questions[0].promptId]).toBe(sim.now);
 
     for (let i = 0; i < 4; i++) playQuestion(sim);
     expect(sim.phase()).toBe('r-end');
@@ -88,7 +88,7 @@ describe('engine: full game', () => {
     sim.advance();
     expect(sim.phase()).toBe('f-write');
 
-    for (const pid of sim.pids) sim.apply(sim.act.finalUpdates(CODE, pid, `true ${pid}`, `fib ${pid}`));
+    for (const pid of sim.pids) sim.apply(sim.act.finalUpdates(CODE, pid, `true ${pid}`, `lie ${pid}`));
     sim.tick();
     expect(sim.phase()).toBe('f-pick');
     expect(sim.room.pub!.final).toHaveLength(6);

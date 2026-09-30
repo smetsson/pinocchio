@@ -15,7 +15,7 @@ export function newSim(names: string[], opts: { mode?: 'live' | 'precall'; lengt
   const pack = getPack('general');
   const pids = names.map((_, i) => `p${i}`);
   const room: Room = {
-    meta: { hostUid: 'u0', hostPid: 'p0', createdAt: now, expiresAt: now + 1e9, pack: 'general', length: opts.length ?? 'standard', mode: opts.mode ?? 'live' },
+    meta: { hostUid: 'u0', hostPid: 'p0', createdAt: now, expiresAt: now + 1e9, pack: 'general', length: opts.length ?? 'standard', mode: opts.mode ?? 'live', group: 'Work Team' },
     state: { v: 0, phase: 'lobby', q: 0, deadline: 0, step: 0 },
     players: Object.fromEntries(names.map((name, i) => [pids[i], { uid: `u${i}`, name, avatar: '🦊', joinedAt: now + i }])),
     presence: Object.fromEntries(pids.map((p) => [p, true])),
@@ -33,7 +33,7 @@ export function newSim(names: string[], opts: { mode?: 'live' | 'precall'; lengt
       return now;
     },
     ctx(): engine.Ctx {
-      return { code: CODE, now, pack, history: db.history?.general ?? {}, rng };
+      return { code: CODE, now, pack, history: db.history?.['work-team']?.general ?? {}, rng };
     },
     apply(u: Updates | null) {
       if (u) applyUpdates(db, u);

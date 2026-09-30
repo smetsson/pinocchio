@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 
 export interface Route {
-  name: 'home' | 'new' | 'room';
+  name: 'home' | 'new' | 'room' | 'screen';
   code?: string;
   params: URLSearchParams;
 }
@@ -11,6 +11,7 @@ export function parseHash(hash: string): Route {
   const params = new URLSearchParams(query ?? '');
   const parts = path.split('/').filter(Boolean);
   if (parts[0] === 'new') return { name: 'new', params };
+  if (parts[0] === 'screen' && parts[1]) return { name: 'screen', code: parts[1].toUpperCase(), params };
   if (parts[0] === 'r' && parts[1]) return { name: 'room', code: parts[1].toUpperCase(), params };
   return { name: 'home', params };
 }
@@ -32,6 +33,11 @@ export function go(path: string) {
 /** Shareable join link for a room. */
 export function joinLink(code: string): string {
   return `${location.origin}${location.pathname}#/r/${code}`;
+}
+
+/** Read-only big-screen view, for screen-sharing on the call. */
+export function screenLink(code: string): string {
+  return `${location.origin}${location.pathname}#/screen/${code}`;
 }
 
 export function hostLink(code: string, key: string): string {

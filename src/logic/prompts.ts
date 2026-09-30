@@ -56,6 +56,22 @@ export function dealPrompts(
   return out;
 }
 
+/** Turn a group name like "Work team!" into a safe database key: "work-team". */
+export function groupKey(name: string): string {
+  const key = name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+  return key || 'default';
+}
+
+export function historyPath(group: string, pack: string): string {
+  return `history/${groupKey(group)}/${pack}`;
+}
+
 export function fillName(template: string, name: string): string {
   return template.replace(/\{name\}/g, name);
 }

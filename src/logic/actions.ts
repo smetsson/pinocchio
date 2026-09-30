@@ -50,16 +50,16 @@ export function likeUpdates(code: string, pid: Pid, q: number, optId: string | n
 
 export type FinalCheck = 'ok' | 'empty' | 'too-long' | 'same';
 
-export function checkFinal(truth: string, fib: string): FinalCheck {
-  if (!normalize(truth) || !normalize(fib)) return 'empty';
-  if (!isValidAnswer(truth) || !isValidAnswer(fib)) return 'too-long';
-  if (normalize(truth) === normalize(fib)) return 'same';
+export function checkFinal(truth: string, lie: string): FinalCheck {
+  if (!normalize(truth) || !normalize(lie)) return 'empty';
+  if (!isValidAnswer(truth) || !isValidAnswer(lie)) return 'too-long';
+  if (normalize(truth) === normalize(lie)) return 'same';
   return 'ok';
 }
 
-export function finalUpdates(code: string, pid: Pid, truth: string, fib: string): Updates {
+export function finalUpdates(code: string, pid: Pid, truth: string, lie: string): Updates {
   return {
-    [roomPath(code, `priv/${pid}/final`)]: { truth: truth.trim(), fib: fib.trim() },
+    [roomPath(code, `priv/${pid}/final`)]: { truth: truth.trim(), lie: lie.trim() },
     [roomPath(code, `status/${pid}/final`)]: true,
   };
 }

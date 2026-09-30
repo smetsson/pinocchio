@@ -10,7 +10,7 @@ export type Phase =
   | 'r-pick' // round 1/2: pick the truth, like a lie
   | 'r-reveal' // round 1/2: step through the options
   | 'r-end' // scoreboard between rounds
-  | 'f-write' // final: write one truth + one fib about yourself
+  | 'f-write' // final: write one truth + one lie about yourself
   | 'f-pick' // final: guess which one is true (per subject)
   | 'f-reveal' // final: reveal (per subject)
   | 'end'; // podium + awards
@@ -23,6 +23,8 @@ export interface Meta {
   pack: string;
   length: GameLength;
   mode: 'live' | 'precall';
+  /** Which group of people is playing (e.g. "work-team"). Question history is kept per group. */
+  group: string;
 }
 
 export interface Player {
@@ -107,7 +109,7 @@ export interface PlayerPrivate {
   lies?: Record<string, { text: string; hash: string }>;
   votes?: Record<string, string>;
   likes?: Record<string, string>;
-  final?: { truth: string; fib: string };
+  final?: { truth: string; lie: string };
   fvotes?: Record<string, 0 | 1>;
 }
 

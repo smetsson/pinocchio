@@ -62,7 +62,7 @@ export async function step(page: Page, isHost: boolean): Promise<string> {
   }
   if (await page.getByTestId('final-truth').isVisible().catch(() => false)) {
     await page.getByTestId('final-truth').fill(`I have been to ${Math.random().toString(36).slice(2, 7)}`);
-    await page.getByTestId('final-fib').fill(`I own a ${Math.random().toString(36).slice(2, 7)}`);
+    await page.getByTestId('final-lie').fill(`I own a ${Math.random().toString(36).slice(2, 7)}`);
     await page.getByTestId('final-submit').click();
     return 'final-write';
   }

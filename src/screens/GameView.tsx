@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { onValue, ref } from 'firebase/database';
 import { t } from '../i18n';
 import { activePids, displayedScore, isAway } from '../logic/engine';
-import { hostLink, joinLink, go } from '../router';
+import { hostLink, joinLink, go, screenLink } from '../router';
 import { session } from '../data/session';
 import { deleteRoom } from '../data/room';
 import { cycleTheme } from '../theme';
@@ -198,6 +198,19 @@ function HostMenu({ onClose }: { onClose: () => void }) {
         >
           🔗 {copied === 'join' ? t.common.copied : t.lobby.copyLink}
         </button>
+      </div>
+
+      <div class="col">
+        <h3>{t.screen.link}</h3>
+        <p class="small muted">{t.screen.linkHint}</p>
+        <div class="row">
+          <button class="btn secondary" style={{ flex: 1 }} onClick={async () => setCopied((await copyText(screenLink(code))) === 'copied' ? 'screen' : '')}>
+            {copied === 'screen' ? t.common.copied : t.common.copy}
+          </button>
+          <a class="btn secondary" style={{ flex: 1, textDecoration: 'none' }} href={screenLink(code)} target="_blank" rel="noopener">
+            {t.screen.open}
+          </a>
+        </div>
       </div>
 
       {link && (

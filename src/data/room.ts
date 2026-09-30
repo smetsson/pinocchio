@@ -15,7 +15,7 @@ import {
 import { GAME } from '../config/game';
 import { roomPath } from '../logic/engine';
 import { randomId, roomCode } from '../logic/random';
-import type { PromptHistory } from '../logic/prompts';
+import { historyPath, type PromptHistory } from '../logic/prompts';
 import type { Meta, Player, Room, Updates } from '../logic/types';
 import type { Fb } from './firebase';
 
@@ -25,6 +25,7 @@ export interface CreateOptions {
   pack: string;
   length: Meta['length'];
   mode: Meta['mode'];
+  group: string;
 }
 
 export async function createRoom(fb: Fb, opts: CreateOptions): Promise<{ code: string; pid: string; hostKey: string }> {
@@ -36,7 +37,7 @@ export async function createRoom(fb: Fb, opts: CreateOptions): Promise<{ code: s
     const code = roomCode();
     const expiresAt = now + GAME.keepUnfinishedDays * 24 * 3600 * 1000;
     const room: Room = {
-      meta: { hostUid: fb.uid, hostPid: pid, createdAt: now, expiresAt, pack: opts.pack, length: opts.length, mode: opts.mode },
+      meta: { hostUid: fb.uid, hostPid: pid, createdAt: now, expiresAt, pack: opts.pack, length: opts.length, mode: opts.mode, group: opts.group },
       state: { v: 0, phase: 'lobby', q: 0, deadline: 0, step: 0 },
       players: { [pid]: { uid: fb.uid, name: opts.name, avatar: opts.avatar, joinedAt: now } },
     };
@@ -185,20 +186,13 @@ export function subscribeRoom(
   return () => unsubs.forEach((u) => u());
 }
 
-export async function loadHistory(fb: Fb, pack: string): Promise<PromptHistory> {
-  try {
-    return (await get(ref(fb.db, `history/${pack}`))).val() ?? {};
-  } catch {
-    return {};
-  }
+export function resetHistory(fb: Fb, group: string, pack: string): Promise<void> {
+  return set(ref(fb.db, historyPath(group, pack)), null);
 }
 
-export function resetHistory(fb: Fb, pack: string): Promise<void> {
-  return set(ref(fb.db, `history/${pack}`), null);
-}
-
-export function watchHistory(fb: Fb, pack: string, cb: (h: PromptHistory) => void): Unsubscribe {
-  return onValue(ref(fb.db, `history/${pack}`), (s) => cb(s.val() ?? {}), () => cb({}));
+/** Which questions this group has already played in a pack. */
+export function watchHistory(fb: Fb, group: string, pack: string, cb: (h: PromptHistory) => void): Unsubscribe {
+  return onValue(ref(fb.db, historyPath(group, pack)), (s) => cb(s.val() ?? {}), () => cb({}));
 }
 
 export async function deleteRoom(fb: Fb, code: string): Promise<void> {

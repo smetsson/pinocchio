@@ -27,7 +27,7 @@ const db = (uid: string | null) => (uid ? env.authenticatedContext(uid).database
 
 function baseRoom(phase = 'lobby', extra: Record<string, unknown> = {}) {
   return {
-    meta: { hostUid: 'host', hostPid: 'p0', createdAt: now, expiresAt: now + 3600_000, pack: 'general', length: 'standard', mode: 'live' },
+    meta: { hostUid: 'host', hostPid: 'p0', createdAt: now, expiresAt: now + 3600_000, pack: 'general', length: 'standard', mode: 'live', group: 'work' },
     state: { v: 0, phase, q: 0, deadline: 0, step: 0 },
     players: {
       p0: { uid: 'host', name: 'Host', avatar: '🦊', joinedAt: now },
@@ -197,8 +197,9 @@ describe('host recovery', () => {
 
 describe('prompt history', () => {
   it('stores timestamps only', async () => {
-    await assertSucceeds(db('ann').ref('history/general/first-concert').set(now));
-    await assertFails(db('ann').ref('history/general/first-concert').set('my secret answer'));
+    await assertSucceeds(db('ann').ref('history/work/general/first-concert').set(now));
+    await assertFails(db('ann').ref('history/work/general/first-concert').set('my secret answer'));
+    await assertSucceeds(db('ann').ref('history/work/general').remove());
     await assertFails(db(null).ref('history').get());
   });
 });

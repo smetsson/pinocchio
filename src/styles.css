@@ -736,7 +736,7 @@ label.field {
   background: var(--truth-bg);
   animation: pop 0.5s;
 }
-.tf-option.is-fib {
+.tf-option.is-lie {
   opacity: 0.65;
   border-color: var(--lie);
 }
@@ -1072,5 +1072,69 @@ label.field {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Big-screen view (#/screen/CODE) ---------- */
+/* Screen-shared video gets scaled down, so everything is zoomed up on wide screens. */
+.screen-lobby {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .bigscreen .page,
+  .bigscreen .header-inner {
+    max-width: 880px;
+  }
+  .bigscreen .screen-lobby {
+    grid-template-columns: 1fr 1.3fr;
+    align-items: start;
+  }
+  .bigscreen #app {
+    zoom: 1.2;
+  }
+}
+@media (min-width: 1200px) {
+  .bigscreen #app {
+    zoom: 1.3;
+  }
+}
+@media (min-width: 1600px) {
+  .bigscreen #app {
+    zoom: 1.8;
+  }
+}
+@media (min-width: 2200px) {
+  .bigscreen #app {
+    zoom: 2.4;
+  }
+}
+/* Watching only: options are shown at full contrast, in two columns to fit a 16:9 screen. */
+.bigscreen .option-btn:disabled:not(.mine),
+.bigscreen .tf-option:disabled {
+  color: var(--ink);
+  opacity: 1;
+}
+@media (min-width: 900px) {
+  .bigscreen .options,
+  .bigscreen .tf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .bigscreen .page {
+    gap: 10px;
+  }
+  .bigscreen .big-emoji {
+    font-size: 48px;
+  }
+}
+@media (min-width: 900px) {
+  .bigscreen .reveal-card {
+    gap: 10px;
+    padding: 14px 18px;
+  }
+  .bigscreen .podium .block {
+    max-height: 90px;
   }
 }

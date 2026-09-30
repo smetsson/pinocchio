@@ -93,11 +93,12 @@ Rooms become unreadable as soon as they expire, and the app deletes expired room
 
 ### Before the call (optional but recommended)
 1. Open the game on your phone → **Create a room**.
-2. Enter your name, pick an avatar, choose the **question pack** and **game length** (*Short* ≈ 20 min, *Standard* ≈ 30 min with 6 players).
-3. Choose when people answer the personal questions:
+2. Enter your name, pick an avatar, and fill in **Who is playing?** (e.g. `Work team`). Pinocchio remembers which questions each group has already played (see [Groups](#groups-playing-with-different-people)).
+3. Choose the **question pack** and **game length** (*Short* ≈ 20 min, *Standard* ≈ 30 min with 6 players).
+4. Choose when people answer the personal questions:
    - **📅 Before the call:** share the link a few days ahead. Everyone answers 2 questions about themselves in their own time. The call itself is then pure play.
    - **⚡ Live:** everyone answers at the start of the game (± 3 minutes).
-4. Share the **room link** in the team chat (tap **📤 Invite your team**), or show the **QR code**.
+5. Share the **room link** in the team chat (tap **📤 Invite your team**), or show the **QR code**.
 
 ### During the call
 1. Everyone opens the link on their **phone** and joins with a name and an emoji.
@@ -106,8 +107,11 @@ Rooms become unreadable as soon as they expire, and the app deletes expired room
    - **Round 1:** a question about a colleague, e.g. *"The weirdest job Sofie ever had was ____"*. Everyone except Sofie writes a believable lie (or taps **🎲 Lie for me**). Then everyone picks what they think is the truth, and can 👍 their favourite lie.
    - **Reveal:** you tap **Next ▶** to reveal each answer: who wrote it, who fell for it, and finally the truth. This is the fun part; take your time!
    - **Round 2:** the same, with **double points**.
-   - **Final round, Truth or Fib:** everyone writes one true fact and one fib about themselves; the others guess which is true.
+   - **Final round, Truth or Lie:** everyone writes one true fact and one lie about themselves; the others guess which is true.
    - **Podium & awards:** 🤥 Best Liar, 🔍 Lie Detector, 👍 Crowd Favourite, 🕵️ The Enigma.
+
+### 📺 Big screen (optional)
+Everything works on phones alone, but if someone can share their screen on the call, open the **big-screen view** on that computer: **☰ → 📺 Big screen view → Open**, or go to `…/#/screen/ABCD` (your room code). It shows the join QR code, the questions, the reveals and the scores in large type. It only watches; it doesn't take a seat in the game. If a corporate laptop blocks the site, simply skip it.
 
 ### Host controls (bottom bar on your phone)
 
@@ -124,6 +128,14 @@ Rooms become unreadable as soon as they expire, and the app deletes expired room
 - Players whose phone has been disconnected for 20+ seconds aren't waited for.
 - **If your phone dies:** open the game again on the same phone; you're back as host. On a *different* phone, open the **host recovery link** from the ☰ menu (save it somewhere at the start, e.g. in a private note).
 - Scoring: truth found = 1000, each player fooled by your lie = 500, each 👍 = 100. Round 2 and the final round count double.
+
+### Groups: playing with different people
+Pinocchio has no accounts, so it doesn't "know" your team. Instead, the host types a group name when creating a room (e.g. `Work team`, `Friends`, `Family`). The name is remembered on the host's phone.
+
+- **Question history is kept per group.** Your work team gets fresh questions every month, even if you also play with friends on the same site.
+- Use the **same group name** each month for the same team (the name isn't case-sensitive), and a **different name** for other people.
+- Anyone who sets up a room with the same group name shares its history (no answers are stored in the history, only which questions were played and when).
+- **Who can join a room?** Only people who have its code or link, and only before the rounds start. The host can remove anyone from the ☰ menu. Rooms and all answers disappear within 24 hours after the game.
 
 ### After the game
 All answers are deleted automatically within 24 hours. You can also tap **🗑️ Delete all answers now** on the final screen.
@@ -165,7 +177,9 @@ Prompt packs are simple JSON files in the [`prompts/`](prompts/) folder. The gam
 - Keep it light and work-friendly: no health, relationships, money or politics.
 - Tip: aim for 20+ prompts per pack. Each 6-player game uses ± 8 prompts and deals 5 per player.
 
-The **"questions not played yet"** counter on the *Create room* screen tells you when a pack is running low. **Reset history** makes all of its questions "fresh" again.
+**Included packs:** 🎲 General (100 questions), 🏖️ Holidays & travel, 🎒 Throwback, 🍕 Food fight, 🔮 What if?
+
+The **"questions not played yet"** counter on the *Create room* screen tells you when a pack is running low for the selected group. **Reset history** makes all of its questions "fresh" again for that group.
 
 ---
 
