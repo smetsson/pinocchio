@@ -67,7 +67,7 @@ export const session = {
     write(s);
   },
   theme(): 'light' | 'dark' | 'auto' {
-    return read().theme ?? 'auto';
+    return read().theme ?? 'dark'; // Dark mode is the default look
   },
   setTheme(theme: 'light' | 'dark' | 'auto') {
     write({ ...read(), theme });

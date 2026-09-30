@@ -13,8 +13,6 @@ export function Home({ fb }: { fb: Fb }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const last = session.lastRoom();
-  // Open the rules for first-time visitors; returning players see them collapsed.
-  const firstVisit = !session.profile().name && !last;
 
   const join = async (e: Event) => {
     e.preventDefault();
@@ -69,11 +67,12 @@ export function Home({ fb }: { fb: Fb }) {
         </button>
       </form>
 
+      <HowToPlay />
+
       <button class="btn secondary" onClick={() => go('/new')}>
         ✨ {t.home.create}
       </button>
 
-      <HowToPlay open={firstVisit} />
     </div>
   );
 }

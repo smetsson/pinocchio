@@ -11,18 +11,18 @@ const html = `<!doctype html><html><head><style>
 * { margin: 0; box-sizing: border-box; }
 body {
   width: 1200px; height: 630px; overflow: hidden;
-  font-family: Fredoka, sans-serif; color: #2b1d14;
-  background: radial-gradient(circle at 15% 10%, #ffe7b0 0, transparent 45%),
-              radial-gradient(circle at 100% 100%, #ffd98f 0, transparent 50%), #fff3d6;
+  font-family: Fredoka, sans-serif; color: #fbf3ff;
+  background: radial-gradient(circle at 15% 10%, #3a2d66 0, transparent 50%),
+              radial-gradient(circle at 100% 100%, #33275d 0, transparent 55%), #1b1530;
   display: flex; align-items: center; gap: 56px; padding: 0 80px;
 }
-.icon { flex-shrink: 0; filter: drop-shadow(0 12px 24px rgba(90, 45, 10, .22)); transform: rotate(-4deg); }
-.title { font-size: 128px; font-weight: 700; color: #b5651d; line-height: 1; letter-spacing: -2px; }
+.icon { flex-shrink: 0; filter: drop-shadow(0 16px 32px rgba(0, 0, 0, .45)); transform: rotate(-4deg); }
+.title { font-size: 128px; font-weight: 700; color: #e28a3c; line-height: 1; letter-spacing: -2px; }
 .tagline { font-size: 44px; font-weight: 600; margin: 18px 0 34px; line-height: 1.15; }
 .chips { display: flex; gap: 12px; }
-.chip { font-size: 25px; font-weight: 600; background: #fff; border: 3px solid #ecd9b8; border-radius: 999px; padding: 9px 18px; white-space: nowrap;
-        box-shadow: 0 4px 0 rgba(60, 30, 5, .15); }
-.chip.accent { background: #ff5a36; color: #fff; border-color: #ff5a36; }
+.chip { font-size: 25px; font-weight: 600; background: #2c2450; color: #fbf3ff; border: 3px solid #40366a; border-radius: 999px; padding: 9px 18px; white-space: nowrap;
+        box-shadow: 0 4px 0 rgba(0, 0, 0, .35); }
+.chip.accent { background: #ff6b4a; color: #fff; border-color: #ff6b4a; }
 </style></head><body>
   <div class="icon">${icon}</div>
   <div>

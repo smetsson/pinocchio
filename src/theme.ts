@@ -8,7 +8,8 @@ export function applyTheme(theme = session.theme()) {
 }
 
 export function cycleTheme(): 'auto' | 'light' | 'dark' {
-  const order = ['auto', 'light', 'dark'] as const;
+  // Starting from the default (dark), the 🌓 button goes to light, then "follow the phone".
+  const order = ['dark', 'light', 'auto'] as const;
   const next = order[(order.indexOf(session.theme()) + 1) % order.length];
   session.setTheme(next);
   applyTheme(next);
