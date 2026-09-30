@@ -1,0 +1,187 @@
+/**
+ * Generates database.rules.json (Firebase Realtime Database security rules).
+ * Run: npm run rules
+ *
+ * Summary:
+ *  - Everything requires (anonymous) sign-in, and rooms become unreadable after meta/expiresAt.
+ *  - Only the host can change the game state, the public game data and the secret answer keys.
+ *  - Players can only write their own seat, answers, votes and likes, and only in the right phase.
+ *  - Truths and lies are private (owner + host) until the host publishes them anonymised.
+ */
+import { writeFileSync } from 'node:fs';
+
+const R = (p) => `root.child('rooms/' + $code + '${p}')`;
+const signedIn = 'auth != null';
+const alive = `${R('/meta/expiresAt')}.val() > now`;
+const isHost = `${R('/meta/hostUid')}.val() === auth.uid`;
+const host = `${signedIn} && ${isHost} && ${alive}`;
+const pub = `${signedIn} && ${alive}`;
+const me = `${signedIn} && ${alive} && ${R("/players/' + $pid + '/uid")}.val() === auth.uid && ${R("/players/' + $pid + '/kicked")}.val() !== true`;
+const phase = (p) => `${R('/state/phase')}.val() === '${p}'`;
+const atQ = (v) => `${R('/state/q')}.val() + '' === ${v}`;
+const subjectOfQ = `${R("/pub/questions/' + $q + '/subject")}.val()`;
+const mine = `${R("/toPlayer/' + $pid + '/mine/' + $q + '")}.val()`;
+const str = (max) => `newData.isString() && newData.val().length > 0 && newData.val().length <= ${max}`;
+const MAX_TTL = 15 * 24 * 3600 * 1000;
+const roomGone = `(!${R('')}.exists() || ${R('/meta/expiresAt')}.val() < now || ${isHost})`;
+
+const rules = {
+  rules: {
+    rooms: {
+      $code: {
+        '.read': host,
+        // Create a new room (or reuse an expired code), or delete it (host, or anyone once expired).
+        '.write': `${signedIn} && $code.matches(/^[A-Z]{4}$/) && (
+          ((!data.exists() || data.child('meta/expiresAt').val() < now) && newData.child('meta/hostUid').val() === auth.uid && newData.child('state/v').val() === 0)
+          || (!newData.exists() && (${isHost} || data.child('meta/expiresAt').val() < now)))`,
+        meta: {
+          '.read': pub,
+          '.write': host,
+          '.validate': "newData.hasChildren(['hostUid', 'hostPid', 'createdAt', 'expiresAt', 'pack', 'length', 'mode'])",
+          // Host recovery: whoever knows the secret host key may take over.
+          hostUid: {
+            '.write': `${signedIn} && ${alive} && newData.val() === auth.uid && root.child('hostKeys/' + $code + '/' + root.child('claims/' + $code + '/' + auth.uid).val()).exists()`,
+            '.validate': 'newData.isString()',
+          },
+          expiresAt: { '.validate': `newData.isNumber() && newData.val() <= now + ${MAX_TTL}` },
+          hostPid: { '.validate': str(40) },
+          createdAt: { '.validate': 'newData.isNumber()' },
+          pack: { '.validate': str(40) },
+          length: { '.validate': "newData.val() === 'short' || newData.val() === 'standard'" },
+          mode: { '.validate': "newData.val() === 'live' || newData.val() === 'precall'" },
+          $other: { '.validate': false },
+        },
+        players: {
+          '.read': pub,
+          $pid: {
+            '.write': `${signedIn} && ${alive} && (
+              (!data.exists() && newData.child('uid').val() === auth.uid && (${phase('lobby')} || ${phase('truths')}))
+              || (data.child('uid').val() === auth.uid && newData.child('uid').val() === auth.uid && newData.child('kicked').val() === data.child('kicked').val())
+              || ${isHost})`,
+            '.validate': "newData.hasChildren(['uid', 'name', 'avatar', 'joinedAt'])",
+            uid: { '.validate': 'newData.isString()' },
+            name: { '.validate': str(20) },
+            avatar: { '.validate': str(16) },
+            joinedAt: { '.validate': 'newData.isNumber()' },
+            kicked: { '.validate': 'newData.isBoolean()' },
+            $other: { '.validate': false },
+          },
+        },
+        presence: {
+          '.read': pub,
+          $pid: { '.write': me, '.validate': 'newData.val() === true || newData.isNumber()' },
+        },
+        state: {
+          '.read': pub,
+          '.write': host,
+          // Optimistic lock: every change must bump v by exactly one.
+          '.validate': "newData.hasChildren(['v', 'phase', 'q', 'deadline', 'step']) && (!data.exists() || newData.child('v').val() === data.child('v').val() + 1)",
+        },
+        pub: { '.read': pub, '.write': host },
+        status: {
+          '.read': pub,
+          $pid: { '.write': me, $key: { '.validate': 'newData.val() === true' } },
+        },
+        priv: {
+          $pid: {
+            '.read': me,
+            truths: {
+              $promptId: { '.write': `${me} && ${phase('truths')}`, '.validate': str(100) },
+            },
+            lies: {
+              $q: {
+                '.write': `${me} && !data.exists() && ${phase('r-lie')} && ${atQ('$q')} && ${subjectOfQ} !== $pid`,
+                '.validate': "newData.hasChildren(['text', 'hash']) && newData.parent().parent().parent().parent().child('lieHashes/' + $q + '/' + newData.child('hash').val()).val() === $pid",
+                text: { '.validate': str(100) },
+                hash: { '.validate': str(40) },
+                $other: { '.validate': false },
+              },
+            },
+            votes: {
+              $q: {
+                '.write': `${me} && ${phase('r-pick')} && ${atQ('$q')} && ${subjectOfQ} !== $pid && newData.val() !== ${mine}`,
+                '.validate': str(20),
+              },
+            },
+            likes: {
+              $q: {
+                '.write': `${me} && ${phase('r-pick')} && ${atQ('$q')} && ${subjectOfQ} !== $pid && (!newData.exists() || newData.val() !== ${mine})`,
+                '.validate': str(20),
+              },
+            },
+            final: {
+              '.write': `${me} && ${phase('f-write')}`,
+              '.validate': "newData.hasChildren(['truth', 'fib'])",
+              truth: { '.validate': str(100) },
+              fib: { '.validate': str(100) },
+              $other: { '.validate': false },
+            },
+            fvotes: {
+              $i: {
+                '.write': `${me} && ${phase('f-pick')} && ${R('/state/q')}.val() + '' === $i && ${R("/pub/final/' + $i + '/subject")}.val() !== $pid`,
+                '.validate': 'newData.val() === 0 || newData.val() === 1',
+              },
+            },
+          },
+        },
+        toPlayer: {
+          '.write': host,
+          $pid: { '.read': me },
+        },
+        secret: { '.write': host },
+        lieHashes: {
+          '.read': pub,
+          $q: {
+            $h: {
+              '.write': `${signedIn} && ${alive} && !data.exists() && ${phase('r-lie')} && ${atQ('$q')}
+                && ${R("/players/' + newData.val() + '/uid")}.val() === auth.uid
+                && ${R("/pub/questions/' + $q + '/truthHash")}.val() !== $h
+                && ${subjectOfQ} !== newData.val()`,
+              '.validate': str(40),
+            },
+          },
+        },
+      },
+    },
+    // Secret host keys (for the host recovery link). Nobody can read them.
+    hostKeys: {
+      $code: {
+        '.write': `${signedIn} && !newData.exists() && ${roomGone}`,
+        $key: {
+          '.write': `${signedIn} && !data.parent().exists() && newData.parent().parent().parent().child('rooms/' + $code + '/meta/hostUid').val() === auth.uid`,
+          '.validate': 'newData.val() === true',
+        },
+      },
+    },
+    // A player's claim of a host key (write-only).
+    claims: {
+      $code: {
+        '.write': `${signedIn} && !newData.exists() && ${roomGone}`,
+        $uid: { '.write': `${signedIn} && auth.uid === $uid`, '.validate': str(60) },
+      },
+    },
+    // Room code -> expiry time, so any phone can clean up expired rooms.
+    roomIndex: {
+      '.read': signedIn,
+      $code: {
+        '.write': `${signedIn} && (
+          (newData.exists() && newData.parent().parent().child('rooms/' + $code + '/meta/hostUid').val() === auth.uid)
+          || (!newData.exists() && (data.val() < now || ${roomGone})))`,
+        '.validate': 'newData.isNumber()',
+      },
+    },
+    // When each prompt was last played, so the team doesn't see repeats. Contains no answers.
+    history: {
+      '.read': signedIn,
+      $pack: {
+        '.write': `${signedIn} && !newData.exists()`,
+        $prompt: { '.write': signedIn, '.validate': 'newData.isNumber()' },
+      },
+    },
+  },
+};
+
+// Collapse whitespace in multi-line conditions.
+const json = JSON.stringify(rules, (k, v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ') : v), 2);
+writeFileSync(new URL('../database.rules.json', import.meta.url), json + '\n');
+console.log('✅ database.rules.json written');

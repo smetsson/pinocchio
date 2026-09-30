@@ -1,0 +1,21 @@
+# Deletes expired game rooms (answers are personal) every day.
+# Needs the FIREBASE_SERVICE_ACCOUNT secret (see README, "Automatic clean-up").
+name: Delete expired rooms
+
+on:
+  schedule:
+    - cron: '17 3 * * *' # every day at 03:17 UTC
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save firebase-admin@14
+      - run: node scripts/cleanup.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

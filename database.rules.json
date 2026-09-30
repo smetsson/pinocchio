@@ -1,0 +1,200 @@
+{
+  "rules": {
+    "rooms": {
+      "$code": {
+        ".read": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+        ".write": "auth != null && $code.matches(/^[A-Z]{4}$/) && ( ((!data.exists() || data.child('meta/expiresAt').val() < now) && newData.child('meta/hostUid').val() === auth.uid && newData.child('state/v').val() === 0) || (!newData.exists() && (root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid || data.child('meta/expiresAt').val() < now)))",
+        "meta": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          ".validate": "newData.hasChildren(['hostUid', 'hostPid', 'createdAt', 'expiresAt', 'pack', 'length', 'mode'])",
+          "hostUid": {
+            ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && newData.val() === auth.uid && root.child('hostKeys/' + $code + '/' + root.child('claims/' + $code + '/' + auth.uid).val()).exists()",
+            ".validate": "newData.isString()"
+          },
+          "expiresAt": {
+            ".validate": "newData.isNumber() && newData.val() <= now + 1296000000"
+          },
+          "hostPid": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "pack": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+          },
+          "length": {
+            ".validate": "newData.val() === 'short' || newData.val() === 'standard'"
+          },
+          "mode": {
+            ".validate": "newData.val() === 'live' || newData.val() === 'precall'"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "players": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          "$pid": {
+            ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && ( (!data.exists() && newData.child('uid').val() === auth.uid && (root.child('rooms/' + $code + '/state/phase').val() === 'lobby' || root.child('rooms/' + $code + '/state/phase').val() === 'truths')) || (data.child('uid').val() === auth.uid && newData.child('uid').val() === auth.uid && newData.child('kicked').val() === data.child('kicked').val()) || root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid)",
+            ".validate": "newData.hasChildren(['uid', 'name', 'avatar', 'joinedAt'])",
+            "uid": {
+              ".validate": "newData.isString()"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+            },
+            "avatar": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 16"
+            },
+            "joinedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "kicked": {
+              ".validate": "newData.isBoolean()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "presence": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          "$pid": {
+            ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true",
+            ".validate": "newData.val() === true || newData.isNumber()"
+          }
+        },
+        "state": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          ".validate": "newData.hasChildren(['v', 'phase', 'q', 'deadline', 'step']) && (!data.exists() || newData.child('v').val() === data.child('v').val() + 1)"
+        },
+        "pub": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid && root.child('rooms/' + $code + '/meta/expiresAt').val() > now"
+        },
+        "status": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          "$pid": {
+            ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true",
+            "$key": {
+              ".validate": "newData.val() === true"
+            }
+          }
+        },
+        "priv": {
+          "$pid": {
+            ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true",
+            "truths": {
+              "$promptId": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && root.child('rooms/' + $code + '/state/phase').val() === 'truths'",
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+              }
+            },
+            "lies": {
+              "$q": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && !data.exists() && root.child('rooms/' + $code + '/state/phase').val() === 'r-lie' && root.child('rooms/' + $code + '/state/q').val() + '' === $q && root.child('rooms/' + $code + '/pub/questions/' + $q + '/subject').val() !== $pid",
+                ".validate": "newData.hasChildren(['text', 'hash']) && newData.parent().parent().parent().parent().child('lieHashes/' + $q + '/' + newData.child('hash').val()).val() === $pid",
+                "text": {
+                  ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+                },
+                "hash": {
+                  ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
+            "votes": {
+              "$q": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && root.child('rooms/' + $code + '/state/phase').val() === 'r-pick' && root.child('rooms/' + $code + '/state/q').val() + '' === $q && root.child('rooms/' + $code + '/pub/questions/' + $q + '/subject').val() !== $pid && newData.val() !== root.child('rooms/' + $code + '/toPlayer/' + $pid + '/mine/' + $q + '').val()",
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+              }
+            },
+            "likes": {
+              "$q": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && root.child('rooms/' + $code + '/state/phase').val() === 'r-pick' && root.child('rooms/' + $code + '/state/q').val() + '' === $q && root.child('rooms/' + $code + '/pub/questions/' + $q + '/subject').val() !== $pid && (!newData.exists() || newData.val() !== root.child('rooms/' + $code + '/toPlayer/' + $pid + '/mine/' + $q + '').val())",
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+              }
+            },
+            "final": {
+              ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && root.child('rooms/' + $code + '/state/phase').val() === 'f-write'",
+              ".validate": "newData.hasChildren(['truth', 'fib'])",
+              "truth": {
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+              },
+              "fib": {
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+              },
+              "$other": {
+                ".validate": false
+              }
+            },
+            "fvotes": {
+              "$i": {
+                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && root.child('rooms/' + $code + '/state/phase').val() === 'f-pick' && root.child('rooms/' + $code + '/state/q').val() + '' === $i && root.child('rooms/' + $code + '/pub/final/' + $i + '/subject').val() !== $pid",
+                ".validate": "newData.val() === 0 || newData.val() === 1"
+              }
+            }
+          }
+        },
+        "toPlayer": {
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          "$pid": {
+            ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true"
+          }
+        },
+        "secret": {
+          ".write": "auth != null && root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid && root.child('rooms/' + $code + '/meta/expiresAt').val() > now"
+        },
+        "lieHashes": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now",
+          "$q": {
+            "$h": {
+              ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && !data.exists() && root.child('rooms/' + $code + '/state/phase').val() === 'r-lie' && root.child('rooms/' + $code + '/state/q').val() + '' === $q && root.child('rooms/' + $code + '/players/' + newData.val() + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/pub/questions/' + $q + '/truthHash').val() !== $h && root.child('rooms/' + $code + '/pub/questions/' + $q + '/subject').val() !== newData.val()",
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40"
+            }
+          }
+        }
+      }
+    },
+    "hostKeys": {
+      "$code": {
+        ".write": "auth != null && !newData.exists() && (!root.child('rooms/' + $code + '').exists() || root.child('rooms/' + $code + '/meta/expiresAt').val() < now || root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid)",
+        "$key": {
+          ".write": "auth != null && !data.parent().exists() && newData.parent().parent().parent().child('rooms/' + $code + '/meta/hostUid').val() === auth.uid",
+          ".validate": "newData.val() === true"
+        }
+      }
+    },
+    "claims": {
+      "$code": {
+        ".write": "auth != null && !newData.exists() && (!root.child('rooms/' + $code + '').exists() || root.child('rooms/' + $code + '/meta/expiresAt').val() < now || root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid)",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60"
+        }
+      }
+    },
+    "roomIndex": {
+      ".read": "auth != null",
+      "$code": {
+        ".write": "auth != null && ( (newData.exists() && newData.parent().parent().child('rooms/' + $code + '/meta/hostUid').val() === auth.uid) || (!newData.exists() && (data.val() < now || (!root.child('rooms/' + $code + '').exists() || root.child('rooms/' + $code + '/meta/expiresAt').val() < now || root.child('rooms/' + $code + '/meta/hostUid').val() === auth.uid))))",
+        ".validate": "newData.isNumber()"
+      }
+    },
+    "history": {
+      ".read": "auth != null",
+      "$pack": {
+        ".write": "auth != null && !newData.exists()",
+        "$prompt": {
+          ".write": "auth != null",
+          ".validate": "newData.isNumber()"
+        }
+      }
+    }
+  }
+}
