@@ -3,7 +3,8 @@
  * Runs daily from GitHub Actions. Locally: FIREBASE_SERVICE_ACCOUNT="$(cat key.json)" node scripts/cleanup.mjs
  */
 import { readFileSync } from 'node:fs';
-import admin from 'firebase-admin';
+import { cert, deleteApp, initializeApp } from 'firebase-admin/app';
+import { getDatabase } from 'firebase-admin/database';
 
 const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
 if (!raw) {
@@ -18,8 +19,8 @@ if (!databaseURL || databaseURL.includes('your-project')) {
   process.exit(1);
 }
 
-admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)), databaseURL });
-const db = admin.database();
+const app = initializeApp({ credential: cert(JSON.parse(raw)), databaseURL });
+const db = getDatabase(app);
 const now = Date.now();
 
 const [index, rooms] = await Promise.all([db.ref('roomIndex').get(), db.ref('rooms').get()]);
@@ -42,4 +43,4 @@ for (const code of codes) {
 }
 if (codes.size) await db.ref().update(updates);
 console.log(`🧹 Deleted ${codes.size} expired room(s): ${[...codes].join(', ') || '-'}`);
-await admin.app().delete();
+await deleteApp(app);
