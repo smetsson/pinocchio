@@ -71,7 +71,7 @@ export function End() {
       )}
 
       <h2>{t.scores.title}</h2>
-      <Scoreboard />
+      <Scoreboard animate />
 
       {isHost && !deleted && (
         <button

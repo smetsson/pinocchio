@@ -66,7 +66,8 @@ export function currentSubject(room: Room): Pid | undefined {
 }
 
 export function currentRound(room: Room): 1 | 2 | 3 {
-  const { phase, q } = room.state;
+  const { phase, q, step } = room.state;
+  if (phase === 'intro') return (step as 1 | 2 | 3) || 1;
   if (phase.startsWith('f-') || phase === 'end') return 3;
   return room.pub?.questions?.[q]?.round ?? 1;
 }
@@ -202,6 +203,11 @@ export function planQuestions(room: Room, ctx: Ctx): Question[] {
   return questions;
 }
 
+/** A few seconds of "Round 2 · double points!" so everyone on the call knows where we are. */
+function startIntro(room: Room, ctx: Ctx, round: 1 | 2 | 3, q: number, u: Updates = {}): Updates {
+  return withState(ctx, room, { phase: 'intro', q, step: round, deadline: deadlineIn(ctx, TIMERS.intro) }, u);
+}
+
 function startQuestion(room: Room, ctx: Ctx, q: number, u: Updates = {}): Updates {
   const question = room.pub!.questions![q];
   u[`${historyPath(room.meta.group ?? 'default', room.meta.pack)}/${question.promptId}`] = ctx.now;
@@ -211,10 +217,9 @@ function startQuestion(room: Room, ctx: Ctx, q: number, u: Updates = {}): Update
 /** Truth phase over: plan the questions and start round 1. */
 export function startRounds(room: Room, ctx: Ctx): Updates {
   const questions = planQuestions(room, ctx);
-  if (!questions.length) return startFinal(room, ctx);
   const u: Updates = { [roomPath(ctx.code, 'pub/questions')]: questions };
-  const next: Room = { ...room, pub: { ...room.pub, questions } };
-  return startQuestion(next, ctx, 0, u);
+  if (!questions.length) return startIntro(room, ctx, 3, 0, u);
+  return startIntro(room, ctx, 1, 0, u);
 }
 
 /** Lie phase over: shuffle the truth, the lies and (if needed) house lies into options. */
@@ -461,6 +466,8 @@ export function advance(room: Room, ctx: Ctx): Updates | null {
       return openTruths(room, ctx);
     case 'truths':
       return startRounds(room, ctx);
+    case 'intro':
+      return room.state.step === 3 ? startFinal(room, ctx) : startQuestion(room, ctx, q);
     case 'r-lie':
       return startPick(room, ctx);
     case 'r-pick':
@@ -470,7 +477,7 @@ export function advance(room: Room, ctx: Ctx): Updates | null {
       return afterQuestion(room, ctx);
     case 'r-end': {
       const next = room.pub?.questions?.[q + 1];
-      return next ? startQuestion(room, ctx, q + 1) : startFinal(room, ctx);
+      return next ? startIntro(room, ctx, 2, q + 1) : startIntro(room, ctx, 3, 0);
     }
     case 'f-write':
       return startFinalPicks(room, ctx);
@@ -498,7 +505,7 @@ export function tick(room: Room, ctx: Ctx): Updates | null {
     const dealt = dealMissingPrompts(room, ctx);
     return Object.keys(dealt).length ? dealt : null;
   }
-  const timed = phase === 'r-lie' || phase === 'r-pick' || phase === 'f-write' || phase === 'f-pick';
+  const timed = phase === 'intro' || phase === 'r-lie' || phase === 'r-pick' || phase === 'f-write' || phase === 'f-pick';
   if (!timed) return null;
   if (everyoneDone(room, ctx.now) || (deadline > 0 && ctx.now >= deadline)) return advance(room, ctx);
   return null;
@@ -562,10 +569,31 @@ export function rematchRoom(room: Room, now: number, hostUid: string): Room {
   };
 }
 
-/** Final standings, best first. */
-export function standings(room: Room): { pid: Pid; score: number; rank: number }[] {
+/**
+ * Scores as they were before the round that just ended (for the scoreboard animation):
+ * on a round's scoreboard, minus that round's points; on the podium, minus the final round's.
+ */
+export function scoresBefore(room: Room): Record<Pid, number> {
+  const before: Record<Pid, number> = { ...(room.pub?.scores ?? {}) };
+  const subtract = (deltas: Record<Pid, number> | undefined) => {
+    for (const [pid, d] of Object.entries(deltas ?? {})) before[pid] = (before[pid] ?? 0) - d;
+  };
+  const questions = room.pub?.questions ?? [];
+  const reveals = room.pub?.reveal ?? {};
+  const roundPoints = (round: number) => questions.forEach((x, i) => x.round === round && subtract(reveals[i]?.deltas));
+  if (room.state.phase === 'r-end') roundPoints(questions[room.state.q]?.round ?? 1);
+  if (room.state.phase === 'end') {
+    const finals = Object.values(room.pub?.finalReveal ?? {});
+    if (finals.length) finals.forEach((f) => subtract(f.deltas));
+    else if (questions.length) roundPoints(questions[questions.length - 1].round);
+  }
+  return before;
+}
+
+/** Standings, best first (ties share a rank). Uses the current scores unless others are given. */
+export function standings(room: Room, scores = room.pub?.scores ?? {}): { pid: Pid; score: number; rank: number }[] {
   const rows = activePids(room)
-    .map((pid) => ({ pid, score: room.pub?.scores?.[pid] ?? 0, rank: 0 }))
+    .map((pid) => ({ pid, score: scores[pid] ?? 0, rank: 0 }))
     .sort((a, b) => b.score - a.score);
   rows.forEach((r, i) => (r.rank = i > 0 && rows[i - 1].score === r.score ? rows[i - 1].rank : i + 1));
   return rows;

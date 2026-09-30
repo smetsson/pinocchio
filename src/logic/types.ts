@@ -6,6 +6,7 @@ export type Pid = string;
 export type Phase =
   | 'lobby' // live mode: waiting for players
   | 'truths' // players answer personal prompts
+  | 'intro' // round title card (state.step = round number 1, 2 or 3)
   | 'r-lie' // round 1/2: write a lie about the subject
   | 'r-pick' // round 1/2: pick the truth, like a lie
   | 'r-reveal' // round 1/2: step through the options

@@ -14,6 +14,6 @@ export const SCORING = {
   multiplier: {
     1: 1, // Round 1
     2: 2, // Round 2
-    3: 2, // Final round: Truth or Lie
+    3: 1, // Final round: Truth or Lie (normal points: each guess is a 50/50 pick)
   } as Record<number, number>,
 };

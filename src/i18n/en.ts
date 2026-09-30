@@ -105,9 +105,13 @@ export const en = {
   },
 
   round: {
+    intro: {
+      1: { icon: '🤥', subtitle: 'Write believable lies about your colleagues. Then find the truth!' },
+      2: { icon: '⚡', subtitle: 'Same game, higher stakes.' },
+      3: { icon: '🎭', subtitle: 'Truth or Lie: one truth and one lie about yourself. Who can tell them apart?' },
+    } as Record<number, { icon: string; subtitle: string }>,
+    points: (m: number) => (m === 1 ? '' : m === 2 ? 'Double points!' : `${m}× points!`),
     title: (r: number) => (r === 3 ? 'Final round' : `Round ${r}`),
-    double: 'Double points!',
-    doubleShort: '×2',
     questionOf: (i: number, n: number) => `Question ${i} of ${n}`,
   },
 
@@ -146,6 +150,7 @@ export const en = {
     truth: 'THE TRUTH ✨',
     likes: (n: number) => `👍 ${n}`,
     alsoLies: 'Nobody fell for these:',
+    drumroll: 'And the truth is…',
     points: 'Points this question',
     fooledYou: 'fooled!',
   },
@@ -153,7 +158,7 @@ export const en = {
   scores: {
     title: 'Scoreboard',
     afterRound: (r: number) => `After round ${r}`,
-    nextRound2: 'Round 2: double points!',
+    nextRound2: 'Round 2',
     nextFinal: 'Final round: Truth or Lie',
   },
 
@@ -197,6 +202,13 @@ export const en = {
   },
 
   waiting: {
+    progress: {
+      truths: (n: number, total: number) => `📝 ${n} of ${total} have answered`,
+      lie: (n: number, total: number) => `✍️ ${n} of ${total} lies are in`,
+      vote: (n: number, total: number) => `👀 ${n} of ${total} have picked`,
+      final: (n: number, total: number) => `🤐 ${n} of ${total} are locked in`,
+      fvote: (n: number, total: number) => `🤔 ${n} of ${total} have guessed`,
+    } as Record<string, (n: number, total: number) => string>,
     title: 'Waiting for',
     everyone: 'Everyone is in! ✨',
     away: 'away',

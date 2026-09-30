@@ -20,6 +20,7 @@ import { Reveal } from './phases/Reveal';
 import { RoundEnd } from './phases/RoundEnd';
 import { FinalPick, FinalReveal } from './phases/Final';
 import { End } from './phases/End';
+import { RoundIntro } from './phases/RoundIntro';
 
 export function BigScreen({ fb, code }: { fb: Fb; code: string }) {
   const [room, setRoom] = useState<Room | null | undefined>(undefined);
@@ -99,6 +100,8 @@ function ScreenPhase() {
           {room.meta.mode === 'precall' && <ScreenLobby compact />}
         </>
       );
+    case 'intro':
+      return <RoundIntro />;
     case 'r-lie':
       return <ScreenLie />;
     case 'r-pick':

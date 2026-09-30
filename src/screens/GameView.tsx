@@ -16,6 +16,7 @@ import { Reveal } from './phases/Reveal';
 import { RoundEnd } from './phases/RoundEnd';
 import { FinalWrite, FinalPick, FinalReveal } from './phases/Final';
 import { End } from './phases/End';
+import { RoundIntro } from './phases/RoundIntro';
 import { startBots, botsAllowed } from '../bots/bots';
 
 export function GameView({ error }: { error: string }) {
@@ -93,6 +94,8 @@ function PhaseView() {
       return <Lobby />;
     case 'truths':
       return <Truths />;
+    case 'intro':
+      return <RoundIntro />;
     case 'r-lie':
       return <Lie />;
     case 'r-pick':
@@ -143,7 +146,7 @@ function HostBar() {
         <button class="icon-btn" onClick={() => setMenu(true)} aria-label={t.host.menu}>
           ☰
         </button>
-        {deadline > 0 && (
+        {deadline > 0 && phase !== 'intro' && (
           <button class="btn secondary small" onClick={host.extend}>
             {t.host.extend}
           </button>

@@ -47,7 +47,8 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
   // Subscribe. Players see public data + their own; the host sees everything.
   useEffect(() => {
     if (claiming) return;
-    setStatus('loading');
+    // Keep showing the game while switching between player and host view (no "Loading…" flash).
+    setStatus((s) => (s === 'ready' ? s : 'loading'));
     return subscribeRoom(
       fb,
       code,

@@ -245,6 +245,53 @@ describe('engine: timers and waiting', () => {
   });
 });
 
+describe('engine: round title cards', () => {
+  it('shows a timed title card before round 1, round 2 and the final round', () => {
+    const sim = newSim(['Ann', 'Bob', 'Cas'], { length: 'short', keepIntros: true });
+    sim.advance();
+    answerTruths(sim);
+    sim.tick();
+    expect(sim.phase()).toBe('intro');
+    expect(engine.currentRound(sim.room)).toBe(1);
+    expect(engine.expectedPids(sim.room)).toEqual([]);
+    expect(sim.tick()).toBeNull(); // waits for the card's timer
+    sim.wait(TIMERS.intro + 1);
+    sim.tick();
+    expect(sim.phase()).toBe('r-lie');
+    // The host can also skip a card.
+    const questions = sim.room.pub!.questions!;
+    sim.apply({ [`rooms/${CODE}/state`]: { ...sim.room.state, phase: 'r-end', q: questions.filter((x) => x.round === 1).length - 1, v: sim.room.state.v + 1 } });
+    sim.advance();
+    expect(sim.phase()).toBe('intro');
+    expect(engine.currentRound(sim.room)).toBe(2);
+    sim.advance();
+    expect(sim.phase()).toBe('r-lie');
+    expect(engine.currentRound(sim.room)).toBe(2);
+  });
+});
+
+describe('engine: scoreboard animation', () => {
+  it('knows the scores from before the round that just ended', () => {
+    const sim = newSim(['Ann', 'Bob', 'Cas'], { length: 'short' });
+    sim.advance();
+    answerTruths(sim);
+    sim.tick();
+    const round1 = sim.room.pub!.questions!.filter((q) => q.round === 1).length;
+    for (let i = 0; i < round1; i++) playQuestion(sim);
+    expect(sim.phase()).toBe('r-end');
+    const before = engine.scoresBefore(sim.room);
+    for (const pid of sim.pids) expect(before[pid]).toBe(0); // nothing before round 1
+    sim.advance(); // round 2
+    for (let i = 0; i < sim.room.pub!.questions!.length - round1; i++) playQuestion(sim);
+    expect(sim.phase()).toBe('r-end');
+    const afterRound1 = engine.scoresBefore(sim.room);
+    const now = sim.room.pub!.scores!;
+    // Everyone found the truth in every question: round 2 gave each voter points.
+    expect(Object.values(now).reduce((a, b) => a + b)).toBeGreaterThan(Object.values(afterRound1).reduce((a, b) => a + b));
+    expect(engine.standings(sim.room, afterRound1)).toHaveLength(3);
+  });
+});
+
 describe('engine: short game', () => {
   it('uses 3 questions per round', () => {
     const sim = newSim(['Ann', 'Bob', 'Cas', 'Dee', 'Eva', 'Fay'], { length: 'short' });

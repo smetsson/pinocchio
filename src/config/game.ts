@@ -2,6 +2,8 @@
  * ⏱️ GAME SETTINGS — timers (seconds) and game length.
  */
 export const TIMERS = {
+  /** Round title card ("Round 2 · double points!"). */
+  intro: 4,
   /** Live mode: time to answer the personal prompts. */
   truths: 180,
   /** Writing a lie about a colleague. */

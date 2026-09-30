@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { t } from '../../i18n';
 import { SCORING } from '../../config/scoring';
 import { currentRound } from '../../logic/engine';
@@ -15,16 +15,46 @@ export function Reveal() {
   const steps = reveal.steps ?? [];
   const truth = steps.find((s) => s.kind === 'truth');
   const current = steps[step];
+  const drumroll = useDrumroll(`${q}-${step}`, current?.kind === 'truth');
   return (
     <>
-      <QuestionHeader noTimer fill={!current || current.kind === 'truth' ? truth?.text : undefined} />
-      {current ? <RevealCard key={`${q}-${step}`} step={current} /> : <Summary truthText={truth?.text ?? ''} />}
+      <QuestionHeader noTimer fill={!current || (current.kind === 'truth' && !drumroll) ? truth?.text : undefined} />
+      {current ? (
+        current.kind === 'truth' ? (
+          drumroll ? <Drumroll key={`${q}-${step}-drum`} /> : <RevealCard key={`${q}-${step}`} step={current} />
+        ) : (
+          <RevealCard key={`${q}-${step}`} step={current} />
+        )
+      ) : (
+        <Summary truthText={truth?.text ?? ''} />
+      )}
       <div class="row" style={{ justifyContent: 'center', gap: '6px' }}>
         {[...steps, null].map((_, i) => (
           <span key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: i === step ? 'var(--accent)' : 'var(--line)' }} />
         ))}
       </div>
     </>
+  );
+}
+
+/** True during a short "And the truth is…" beat when the truth step comes up. */
+function useDrumroll(stepKey: string, isTruth: boolean): boolean {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [doneFor, setDoneFor] = useState('');
+  useEffect(() => {
+    if (!isTruth || reduced) return;
+    const id = setTimeout(() => setDoneFor(stepKey), 1800);
+    return () => clearTimeout(id);
+  }, [stepKey, isTruth]);
+  return isTruth && !reduced && doneFor !== stepKey;
+}
+
+function Drumroll() {
+  return (
+    <div class="reveal-card drumroll" data-testid="drumroll">
+      <div class="drumroll-icon">🥁</div>
+      <div class="answer">{t.reveal.drumroll}</div>
+    </div>
   );
 }
 

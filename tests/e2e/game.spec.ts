@@ -131,8 +131,11 @@ test('a latecomer can jump in, and a backup host keeps the game going when the h
   await expect(ann.getByText(/You're hosting until Hostie is back/)).toBeVisible();
   await expect(bob.getByTestId('host-next')).toHaveCount(0);
   // ...and the game keeps moving: once the connected players have lied, the stand-in moves on to picking.
-  for (const page of [ann, bob, late]) await step(page, false);
-  await expect(bob.getByText('Find the truth!').or(bob.getByText('Who will find your truth?'))).toBeVisible({ timeout: 15_000 });
+  const picking = bob.getByText('Find the truth!').or(bob.getByText('Who will find your truth?'));
+  await expect(async () => {
+    for (const page of [ann, bob, late]) await step(page, false);
+    await expect(picking).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
 
   // The host comes back and automatically gets hosting back.
   await host.goto(`/#/r/${code}`);

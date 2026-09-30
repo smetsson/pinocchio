@@ -4,7 +4,7 @@ import { SCORING } from '../../config/scoring';
 import { checkFinal, finalUpdates, finalVoteUpdates } from '../../logic/actions';
 import { hasSubmitted } from '../../logic/engine';
 import { MAX_ANSWER } from '../../logic/normalize';
-import { Avatar, PlayerMini, Timer, WaitingFor, buzz, confetti } from '../../ui/components';
+import { Avatar, PlayerMini, Progress, Timer, WaitingFor, buzz, confetti } from '../../ui/components';
 import { useGame } from '../../ui/game';
 
 function FinalHeader({ noTimer }: { noTimer?: boolean }) {
@@ -14,7 +14,8 @@ function FinalHeader({ noTimer }: { noTimer?: boolean }) {
     <div class="col">
       <div class="row">
         <span class="round-pill">
-          {t.round.title(3)} {t.round.doubleShort}
+          {t.round.title(3)}
+          {(SCORING.multiplier[3] ?? 1) > 1 ? ` · ${t.round.points(SCORING.multiplier[3])}` : ''}
         </span>
         <span class="spacer" />
         {room.state.phase !== 'f-write' && <span class="small muted nowrap">{t.round.questionOf(room.state.q + 1, n)}</span>}
@@ -94,6 +95,7 @@ export function FinalPick() {
         <h2>{isSubject && !spectator ? t.final.subjectTitle : t.final.pickTitle(subject?.name ?? '')}</h2>
       </div>
       {isSubject && <p class="muted center">{t.final.subjectHint}</p>}
+      <Progress />
       <div class="tf-grid" data-testid="tf-options">
         {fq.options.map((text, idx) => (
           <button
@@ -110,7 +112,7 @@ export function FinalPick() {
           </button>
         ))}
       </div>
-      <WaitingFor onlyMissing />
+      <WaitingFor onlyMissing noProgress />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import QRCode from 'qrcode';
 import { t } from '../i18n';
-import { isAway, hasSubmitted, expectedPids } from '../logic/engine';
+import { isAway, hasSubmitted, expectedPids, statusKey } from '../logic/engine';
 import type { Pid, Player } from '../logic/types';
 import { useGame } from './game';
 
@@ -69,7 +69,8 @@ export function useTicker(ms = 250): void {
   }, [ms]);
 }
 
-export function Timer() {
+/** Countdown bar. `bare` = just the bar (no seconds, no red warning), e.g. on title cards. */
+export function Timer({ bare }: { bare?: boolean }) {
   const { room, now } = useGame();
   useTicker(250);
   const { deadline } = room.state;
@@ -79,19 +80,39 @@ export function Timer() {
   // Remember the span when a new deadline appears (so the bar starts full, and "+30s" refills it).
   if (total.current.deadline !== deadline) total.current = { deadline, span: Math.max(left, 1000) };
   const secs = Math.ceil(left / 1000);
-  const low = secs <= 10;
+  const low = !bare && secs <= 10;
   return (
     <div class="row" aria-live="off">
       <div class={`timer grow ${low ? 'low' : ''}`}>
         <div class="fill" style={{ transform: `scaleX(${Math.min(1, left / total.current.span)})` }} />
       </div>
-      <span class={`timer-label ${low ? 'low' : ''}`}>{t.timer.seconds(secs)}</span>
+      {!bare && <span class={`timer-label ${low ? 'low' : ''}`}>{t.timer.seconds(secs)}</span>}
     </div>
   );
 }
 
 /** Shows who still has to submit in this phase. The host can tap a player to remove them. */
-export function WaitingFor({ onlyMissing }: { onlyMissing?: boolean }) {
+/** "👀 4 of 5 have picked" with a bar, for the current phase. */
+export function Progress() {
+  const { room } = useGame();
+  const expected = expectedPids(room);
+  const done = expected.filter((pid) => hasSubmitted(room, pid)).length;
+  const key = statusKey(room.state)?.split('-')[0] ?? '';
+  const label = t.waiting.progress[key]?.(done, expected.length);
+  if (!label || !expected.length) return null;
+  return (
+    <div class="progress-pill" data-testid="progress">
+      <span key={done} class="pop-in">
+        {label}
+      </span>
+      <div class="progress-bar">
+        <div style={{ transform: `scaleX(${done / expected.length})` }} />
+      </div>
+    </div>
+  );
+}
+
+export function WaitingFor({ onlyMissing, noProgress }: { onlyMissing?: boolean; noProgress?: boolean }) {
   const { room, now, isHost, host, pid: me } = useGame();
   useTicker(2000);
   const expected = expectedPids(room);
@@ -100,6 +121,7 @@ export function WaitingFor({ onlyMissing }: { onlyMissing?: boolean }) {
   const shown = onlyMissing ? missing : expected;
   return (
     <div class="col">
+      {!noProgress && <Progress />}
       <h3 class="small muted">{missing.length ? t.waiting.title : t.waiting.everyone}</h3>
       <div class="waiting">
         {shown.map((pid) => {
@@ -158,6 +180,29 @@ export function Sheet({ onClose, children }: { onClose: () => void; children: Co
       </div>
     </div>
   );
+}
+
+/** Animate a number from `from` to `to` (after `delay` ms), for scoreboards. */
+export function useCountUp(from: number, to: number, delay = 0, duration = 1200): number {
+  const [value, setValue] = useState(from);
+  useEffect(() => {
+    if (from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setValue(to);
+      return;
+    }
+    setValue(from);
+    let frame = 0;
+    const start = performance.now() + delay;
+    const tick = (now: number) => {
+      const p = Math.min(1, Math.max(0, (now - start) / duration));
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.round(from + (to - from) * eased));
+      if (p < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [from, to, delay, duration]);
+  return value;
 }
 
 /** Small dependency-free confetti burst. */

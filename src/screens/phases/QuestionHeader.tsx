@@ -1,4 +1,5 @@
 import { t } from '../../i18n';
+import { SCORING } from '../../config/scoring';
 import { currentRound, currentSubject } from '../../logic/engine';
 import { Avatar, PromptText, Timer } from '../../ui/components';
 import { useGame } from '../../ui/game';
@@ -18,7 +19,7 @@ export function QuestionHeader({ fill, noTimer }: { fill?: string; noTimer?: boo
       <div class="row">
         <span class="round-pill">
           {t.round.title(round)}
-          {round === 2 ? ` · ${t.round.double}` : ''}
+          {(SCORING.multiplier[round] ?? 1) > 1 ? ` · ${t.round.points(SCORING.multiplier[round])}` : ''}
         </span>
         <span class="spacer" />
         <span class="small muted nowrap">{t.round.questionOf(Math.max(1, index), inRound.length)}</span>

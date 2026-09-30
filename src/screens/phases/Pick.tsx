@@ -1,7 +1,7 @@
 import { t } from '../../i18n';
 import { likeUpdates, voteUpdates } from '../../logic/actions';
 import { currentSubject } from '../../logic/engine';
-import { WaitingFor, buzz } from '../../ui/components';
+import { Progress, WaitingFor, buzz } from '../../ui/components';
 import { useGame } from '../../ui/game';
 import { QuestionHeader } from './QuestionHeader';
 
@@ -20,6 +20,7 @@ export function Pick() {
       <QuestionHeader />
       <h2>{spectator ? t.pick.title : isSubject ? t.pick.subjectTitle : vote ? t.pick.picked : t.pick.title}</h2>
       {isSubject && <p class="muted">{t.pick.subjectHint}</p>}
+      <Progress />
       <div class="options" data-testid="options">
         {options.map((o, i) => {
           const isMine = o.id === mine;
@@ -51,7 +52,7 @@ export function Pick() {
         })}
       </div>
       {!watching && <p class="small muted center">{t.pick.likeHint}</p>}
-      <WaitingFor onlyMissing />
+      <WaitingFor onlyMissing noProgress />
     </>
   );
 }

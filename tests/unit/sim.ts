@@ -8,7 +8,7 @@ import type { Room, Updates } from '../../src/logic/types';
 
 export const CODE = 'TEST';
 
-export function newSim(names: string[], opts: { mode?: 'live' | 'precall'; length?: 'short' | 'standard'; seed?: number } = {}) {
+export function newSim(names: string[], opts: { mode?: 'live' | 'precall'; length?: 'short' | 'standard'; seed?: number; keepIntros?: boolean } = {}) {
   const db: Record<string, any> = {};
   let now = 1_700_000_000_000;
   const rng = seeded(opts.seed ?? 42);
@@ -38,12 +38,18 @@ export function newSim(names: string[], opts: { mode?: 'live' | 'precall'; lengt
     apply(u: Updates | null) {
       if (u) applyUpdates(db, u);
     },
+    /** Round title cards are skipped automatically unless keepIntros is set. */
+    skipIntro() {
+      if (!opts.keepIntros && sim.room.state.phase === 'intro') sim.apply(engine.advance(sim.room, sim.ctx()));
+    },
     advance() {
       sim.apply(engine.advance(sim.room, sim.ctx()));
+      sim.skipIntro();
     },
     tick() {
       const u = engine.tick(sim.room, sim.ctx());
       sim.apply(u);
+      sim.skipIntro();
       return u;
     },
     wait(seconds: number) {

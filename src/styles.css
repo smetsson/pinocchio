@@ -1138,3 +1138,120 @@ label.field {
     max-height: 90px;
   }
 }
+
+/* ---------- Round title card ---------- */
+.round-intro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  min-height: 60dvh;
+}
+.round-intro-icon {
+  font-size: 96px;
+  line-height: 1;
+  animation: introIcon 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.round-intro-title {
+  font-size: 48px;
+  color: var(--wood);
+  animation: pop 0.5s 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.round-intro-points {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 750;
+  font-size: 22px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  transform: rotate(-3deg);
+  animation: stamp 0.45s 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.round-intro-sub {
+  color: var(--muted);
+  max-width: 320px;
+  animation: slideUp 0.4s 0.9s both;
+}
+.round-intro-timer {
+  width: 60%;
+  margin-top: 8px;
+  animation: fade 0.4s 1s both;
+}
+@keyframes introIcon {
+  from {
+    transform: scale(0) rotate(-30deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ---------- "3 of 5 have picked" ---------- */
+.progress-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+.progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progress-bar > div {
+  height: 100%;
+  background: var(--lie);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- "And the truth is…" ---------- */
+.reveal-card.drumroll {
+  border-style: dashed;
+  animation: pop 0.4s both, breathe 0.9s 0.4s ease-in-out infinite;
+}
+.drumroll-icon {
+  font-size: 56px;
+  display: inline-block;
+  animation: drum 0.25s ease-in-out infinite alternate;
+}
+@keyframes breathe {
+  50% {
+    transform: scale(1.03);
+  }
+}
+@keyframes drum {
+  from {
+    transform: rotate(-12deg) scale(1);
+  }
+  to {
+    transform: rotate(12deg) scale(1.1);
+  }
+}
+
+/* ---------- Scoreboard movement ---------- */
+.rank-move {
+  font-weight: 800;
+  font-size: 15px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.rank-move.up {
+  color: var(--truth);
+  background: var(--truth-bg);
+}
+.rank-move.down {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 15%, var(--card));
+}

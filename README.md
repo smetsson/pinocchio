@@ -52,11 +52,12 @@ Everything is set up and running. You don't need to do anything here; this is ju
 ### During the call
 1. Everyone opens the link on their **phone** and joins with a name and an emoji.
 2. You press **Start game** at the bottom of your screen (needs 3+ players; best with 6).
-3. The game runs:
+3. The game runs (each round starts with a short title card, so everyone on the call knows where you are):
    - **Round 1:** a question about a colleague, e.g. *"The weirdest job Sofie ever had was ____"*. Everyone except Sofie writes a believable lie (or taps **🎲 Lie for me**). Then everyone picks what they think is the truth, and can 👍 their favourite lie.
-   - **Reveal:** you tap **Next ▶** to reveal each answer: who wrote it, who fell for it, and finally the truth. This is the fun part; take your time!
+   - **Reveal:** you tap **Next ▶** to reveal each answer: who wrote it, who fell for it, and finally (after a little drumroll 🥁) the truth. This is the fun part; take your time!
+   - **Scoreboard** after each round: points count up and arrows show who climbed or dropped.
    - **Round 2:** the same, with **double points**.
-   - **Final round, Truth or Lie:** everyone writes one true fact and one lie about themselves; the others guess which is true.
+   - **Final round, Truth or Lie:** everyone writes one true fact and one lie about themselves; the others guess which is true (normal points).
    - **Podium & awards:** 🤥 Best Liar, 🔍 Lie Detector, 👍 Crowd Favourite, 🕵️ The Enigma.
 4. **Someone joins late?** No problem: they can open the link and jump in any time before the podium. They write lies and vote from then on (they just won't be asked about themselves in rounds 1–2).
 5. **Another round?** On the podium screen, tap **🔁 Play again with the same players**. Everyone's phone (and the big screen) moves to the new game by itself, and you get fresh questions.
@@ -79,7 +80,7 @@ Everything works on phones alone, but if someone can share their screen on the c
 - Players whose phone has been disconnected for 20+ seconds aren't waited for.
 - **If you leave the game on your phone** (e.g. to check the call chat) for more than 15 seconds, the first player who's still connected **automatically takes over as host**, so the game keeps going for everyone. Their phone says *"You're hosting until … is back"*. When you come back, you get hosting back automatically.
 - **If your phone dies:** open the game again on the same phone; you're back as host. On a *different* phone, open the **host recovery link** from the ☰ menu (save it somewhere at the start, e.g. in a private note).
-- Scoring: truth found = 1000, each player fooled by your lie = 500, each 👍 = 100. Round 2 and the final round count double.
+- Scoring: truth found = 1000, each player fooled by your lie = 500, each 👍 = 100. **Round 2 counts double.** The final round counts normally: each guess there is a 50/50 pick, so doubling it would let luck decide the winner.
 
 ### Groups: playing with different people
 Pinocchio has no accounts, so it doesn't "know" your team. Instead, the host types a group name when creating a room (e.g. `Work team`, `Friends`, `Family`). The name is remembered on the host's phone.
