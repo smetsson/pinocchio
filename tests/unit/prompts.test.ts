@@ -15,8 +15,11 @@ describe('prompt packs', () => {
         expect(p.them, p.id).toContain('____');
         expect(p.lies.length, p.id).toBeGreaterThanOrEqual(3);
       }
+      // Standard pack size: 25 questions.
+      expect(pack.prompts.length, `${pack.id} has fewer than 25 questions`).toBeGreaterThanOrEqual(25);
     }
     expect(getPack('general').prompts.length).toBeGreaterThanOrEqual(100);
+    expect(getPack('what-if').prompts.length).toBeGreaterThanOrEqual(50);
   });
 });
 
