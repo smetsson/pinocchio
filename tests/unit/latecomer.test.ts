@@ -45,10 +45,10 @@ describe('host failover', () => {
     expect(engine.backupHost(sim.room, sim.now + (GAME.hostFailoverSeconds + 1) * 1000)).toBe('p1');
   });
 
-  it('never fails over in the lobby or days ahead in pre-call mode', () => {
+  it('fails over in the lobby too, but never days ahead in pre-call mode', () => {
     const lobby = newSim(['Host', 'Ann', 'Bob']);
     lobby.apply({ [`rooms/${CODE}/presence/p0`]: lobby.now });
-    expect(engine.backupHost(lobby.room, lobby.now + 3600_000)).toBeUndefined();
+    expect(engine.backupHost(lobby.room, lobby.now + 3600_000)).toBe('p1');
     const pre = newSim(['Host', 'Ann', 'Bob'], { mode: 'precall' });
     pre.advance();
     pre.apply({ [`rooms/${CODE}/presence/p0`]: pre.now });

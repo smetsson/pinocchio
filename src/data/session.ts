@@ -2,6 +2,8 @@
 export interface Seat {
   pid: string;
   hostKey?: string;
+  /** Secret that proves this phone owns the seat, if its sign-in identity is ever lost. */
+  seatKey?: string;
 }
 
 const KEY = 'pinocchio:v1';

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Fb } from '../data/firebase';
 import { getPack } from '../data/packs';
-import { claimHost, subscribeRoom, takeHost, trackPresence, watchHistory, watchServerOffset, write } from '../data/room';
+import { claimHost, reclaimSeat, registerSeatKey, subscribeRoom, takeHost, trackPresence, watchHistory, watchServerOffset, write } from '../data/room';
 import { session } from '../data/session';
 import { t } from '../i18n';
 import * as engine from '../logic/engine';
@@ -88,6 +88,34 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
   }, [pid]);
 
   const kicked = !!(pid && room?.players?.[pid]?.kicked);
+
+  // This phone remembers a seat, but its sign-in identity changed (e.g. part of the browser's
+  // storage was cleared): take the seat back with the saved key, and host rights for the creator.
+  const [recovering, setRecovering] = useState(false);
+  const recoveryTried = useRef(false);
+  useEffect(() => {
+    const saved = session.seat(code);
+    const seat = saved && room?.players?.[saved.pid];
+    if (!room || !saved || !seat || seat.kicked || seat.uid === fb.uid || recoveryTried.current) return;
+    const isOwner = saved.pid === engine.ownerPid(room);
+    if (!(isOwner && saved.hostKey) && !saved.seatKey) return;
+    recoveryTried.current = true;
+    setRecovering(true);
+    const recover = isOwner && saved.hostKey ? claimHost(fb, code, saved.hostKey) : reclaimSeat(fb, code, saved.pid, saved.seatKey!);
+    recover
+      .then(() => setSeatPid(saved.pid))
+      .catch((e) => console.warn('could not take seat back', e))
+      .finally(() => setRecovering(false));
+  }, [room?.players, fb.uid]);
+
+  // Give my seat a secret key once, so this phone can always take it back.
+  useEffect(() => {
+    if (!pid || kicked || session.seat(code)?.seatKey) return;
+    registerSeatKey(fb, code, pid).then(
+      (seatKey) => session.saveSeat(code, { pid, seatKey }),
+      () => undefined, // a key was already registered from another device
+    );
+  }, [pid, kicked]);
 
   useEffect(() => {
     if (!pid || kicked) return;
@@ -178,7 +206,7 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
   }, [autoplay, isHost, room?.state.v]);
   useWakeLock(status === 'ready' && !!pid && room?.state.phase !== 'end' && !(room?.meta.mode === 'precall' && room?.state.phase === 'truths'));
 
-  if (claiming || status === 'loading') return <Loading />;
+  if (claiming || recovering || status === 'loading') return <Loading />;
   if (status === 'missing' || !room) {
     return (
       <div class="page">

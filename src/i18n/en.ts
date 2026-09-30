@@ -90,7 +90,7 @@ export const en = {
     started: 'This game has already finished. Ask the host to start a new room.',
     inProgress: '⏱️ The game is already going: jump in! You can write lies and vote right away.',
     full: 'This room is full.',
-    nameTaken: 'Someone already uses that name. Pick another one!',
+    nameTaken: 'Someone in this game already has that name. If that is you, open the game on the phone and browser you joined with, and it will put you back in your seat. Otherwise, pick another name.',
     kicked: 'The host removed you from this game.',
   },
 
@@ -246,7 +246,8 @@ export const en = {
     endConfirm: 'End the game now and go to the final scores?',
     recoveryLink: 'Host recovery link',
     recoveryHint: 'Open this on another phone if yours breaks, to take over as host. Keep it secret!',
-    hostLost: 'The host is reconnecting… Someone else takes over in a few seconds if needed.',
+    hostLost: 'The host is away… If they are not back in a few seconds, someone else takes over.',
+    hostLostWaiting: 'The host is away. The game continues when they are back.',
     standingIn: (name: string) => `👑 You're hosting until ${name} is back. Tap Next to keep the game going!`,
     theme: 'Theme',
     startTruthsFirst: 'Start the game (with everyone who answered)',

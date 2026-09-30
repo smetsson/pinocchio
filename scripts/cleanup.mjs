@@ -29,7 +29,7 @@ for (const [code, expiresAt] of Object.entries(index.val() ?? {})) if (expiresAt
 // Also catch rooms missing from the index.
 for (const [code, room] of Object.entries(rooms.val() ?? {})) if (!(room?.meta?.expiresAt > now)) codes.add(code);
 // And orphaned host keys / claims.
-for (const path of ['hostKeys', 'claims']) {
+for (const path of ['hostKeys', 'seatKeys', 'claims']) {
   const snap = await db.ref(path).get();
   for (const code of Object.keys(snap.val() ?? {})) if (!rooms.child(code).exists()) codes.add(code);
 }
@@ -39,6 +39,7 @@ for (const code of codes) {
   updates[`rooms/${code}`] = null;
   updates[`roomIndex/${code}`] = null;
   updates[`hostKeys/${code}`] = null;
+  updates[`seatKeys/${code}`] = null;
   updates[`claims/${code}`] = null;
 }
 if (codes.size) await db.ref().update(updates);

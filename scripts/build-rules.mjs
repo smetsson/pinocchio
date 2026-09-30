@@ -28,11 +28,14 @@ const mode = (m) => `(${R('/meta/mode')}.val() === '${m}')`;
 const HOST_AWAY_MS = 15000;
 const hostPresence = `${R("/presence/' + " + R('/meta/hostPid') + ".val() + '")}`;
 const hostAway = `(${hostPresence}.isNumber() && ${hostPresence}.val() < now - ${HOST_AWAY_MS})`;
-const gameRunning = `!${phase('lobby')} && !${phase('end')} && !(${phase('truths')} && ${mode('precall')})`;
+// Failover is possible from the lobby until the podium, except days ahead in pre-call mode.
+const gameRunning = `!${phase('end')} && !(${phase('truths')} && ${mode('precall')})`;
 const seatIsMine = (pidExpr) => `${R("/players/' + " + pidExpr + " + '/uid")}.val() === auth.uid && ${R("/players/' + " + pidExpr + " + '/kicked")}.val() !== true`;
 const ownerPidExpr = `${R('/meta/ownerPid')}.val()`;
 // Guard with isString(): gluing a missing claim into a path is an error, and an error makes the whole rule false.
 const claimOk = `(root.child('claims/' + $code + '/' + auth.uid).isString() && root.child('hostKeys/' + $code + '/' + root.child('claims/' + $code + '/' + auth.uid).val()).exists())`;
+// A phone proving it owns seat $pid with the secret seat key it saved when it joined.
+const seatClaimOk = `(root.child('claims/' + $code + '/' + auth.uid).isString() && root.child('seatKeys/' + $code + '/' + $pid + '/' + root.child('claims/' + $code + '/' + auth.uid).val()).exists())`;
 const roomGone = `(!${R('')}.exists() || ${R('/meta/expiresAt')}.val() < now || ${isHost})`;
 
 const rules = {
@@ -78,6 +81,7 @@ const rules = {
             '.write': `${signedIn} && ${alive} && (
               (!data.exists() && newData.child('uid').val() === auth.uid && !${phase('end')})
               || (data.child('uid').val() === auth.uid && newData.child('uid').val() === auth.uid && newData.child('kicked').val() === data.child('kicked').val())
+              || (${seatClaimOk} && newData.child('uid').val() === auth.uid && newData.child('kicked').val() === data.child('kicked').val())
               || ${isHost})`,
             '.validate': "newData.hasChildren(['uid', 'name', 'avatar', 'joinedAt'])",
             uid: { '.validate': 'newData.isString()' },
@@ -174,7 +178,20 @@ const rules = {
         },
       },
     },
-    // A player's claim of a host key (write-only).
+    // Secret seat keys: lets a phone take back its own seat if its sign-in identity is ever lost.
+    // Written once by the seat's owner; nobody can read them.
+    seatKeys: {
+      $code: {
+        '.write': `${signedIn} && !newData.exists() && ${roomGone}`,
+        $pid: {
+          $key: {
+            '.write': `${signedIn} && !data.parent().exists() && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid`,
+            '.validate': 'newData.val() === true',
+          },
+        },
+      },
+    },
+    // A player's claim of a host or seat key (write-only).
     claims: {
       $code: {
         '.write': `${signedIn} && !newData.exists() && ${roomGone}`,

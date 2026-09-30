@@ -225,9 +225,9 @@ describe('host failover', () => {
     await assertFails(takeOver('ann', 'p1'));
   });
 
-  it('no takeover in the lobby or days ahead in pre-call mode', async () => {
+  it('takeover works in the lobby, but not days ahead in pre-call mode', async () => {
     await seed({ ...baseRoom('lobby'), presence: { p0: now - 60_000 } });
-    await assertFails(takeOver('ann', 'p1'));
+    await assertSucceeds(takeOver('ann', 'p1'));
     const precall = baseRoom('truths');
     precall.meta.mode = 'precall';
     await seed({ ...precall, presence: { p0: now - 60_000 } });
@@ -237,6 +237,24 @@ describe('host failover', () => {
   it("the room's creator can't be changed", async () => {
     await seed(baseRoom());
     await assertFails(db('host').ref(`rooms/${C}/meta/ownerPid`).set('p1'));
+  });
+});
+
+describe('seat keys', () => {
+  it('a phone whose sign-in identity changed takes its seat back with its key', async () => {
+    await seed(baseRoom('r-lie'));
+    // Ann registers a key for her own seat (only once, and only for her own seat).
+    await assertFails(db('bob').ref(`seatKeys/${C}/p1/bobs-key`).set(true));
+    await assertSucceeds(db('ann').ref(`seatKeys/${C}/p1/anns-key`).set(true));
+    await assertFails(db('ann').ref(`seatKeys/${C}/p1/second-key`).set(true));
+    await assertFails(db('ann').ref(`seatKeys/${C}`).get());
+    // Later, Ann's phone has a new identity: wrong key fails, the right key works.
+    await assertSucceeds(db('ann-new').ref(`claims/${C}/ann-new`).set('guess'));
+    await assertFails(db('ann-new').ref(`rooms/${C}/players/p1/uid`).set('ann-new'));
+    await assertSucceeds(db('ann-new').ref(`claims/${C}/ann-new`).set('anns-key'));
+    await assertFails(db('ann-new').ref(`rooms/${C}/players/p2/uid`).set('ann-new')); // not Bob's seat
+    await assertSucceeds(db('ann-new').ref(`rooms/${C}/players/p1/uid`).set('ann-new'));
+    await assertSucceeds(db('ann-new').ref(`rooms/${C}/status/p1/lie-0`).set(true)); // and can play on
   });
 });
 

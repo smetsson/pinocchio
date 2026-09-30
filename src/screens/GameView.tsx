@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { onValue, ref } from 'firebase/database';
 import { t } from '../i18n';
-import { activePids, displayedScore, isAway, ownerPid } from '../logic/engine';
+import { activePids, displayedScore, failoverAllowed, isAway, ownerPid } from '../logic/engine';
 import { hostLink, joinLink, go, screenLink } from '../router';
 import { session } from '../data/session';
 import { deleteRoom } from '../data/room';
@@ -54,7 +54,9 @@ export function GameView({ error }: { error: string }) {
         </div>
       </header>
       {!connected && <div class="banner">{t.common.offline}</div>}
-      {connected && hostAway && phase !== 'end' && <div class="banner">{t.host.hostLost}</div>}
+      {connected && hostAway && phase !== 'end' && (
+        <div class="banner">{failoverAllowed(room) ? t.host.hostLost : t.host.hostLostWaiting}</div>
+      )}
       {connected && isHost && pid !== ownerPid(room) && phase !== 'end' && (
         <div class="banner">{t.host.standingIn(room.players?.[ownerPid(room)]?.name ?? '')}</div>
       )}

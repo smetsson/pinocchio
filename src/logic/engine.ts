@@ -528,10 +528,10 @@ export function ownerPid(room: Room): Pid {
   return room.meta.ownerPid ?? room.meta.hostPid;
 }
 
-/** Failover only makes sense while a game is being played (not days ahead in pre-call mode). */
+/** Failover works from the lobby until the podium (but not days ahead in pre-call mode). */
 export function failoverAllowed(room: Room): boolean {
   const { phase } = room.state;
-  if (phase === 'lobby' || phase === 'end') return false;
+  if (phase === 'end') return false;
   if (phase === 'truths' && room.meta.mode === 'precall') return false;
   return true;
 }

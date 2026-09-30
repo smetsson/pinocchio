@@ -130,6 +130,23 @@ export async function claimHost(fb: Fb, code: string, key: string): Promise<stri
   return owner;
 }
 
+/** Save a secret key for my seat, so this phone can always take its seat back. */
+export async function registerSeatKey(fb: Fb, code: string, pid: string): Promise<string> {
+  const key = randomId(24);
+  await set(ref(fb.db, `seatKeys/${code}/${pid}/${key}`), true);
+  return key;
+}
+
+/** This phone's sign-in identity changed (browser storage was cleared): take my seat back with its key. */
+export async function reclaimSeat(fb: Fb, code: string, pid: string, key: string): Promise<void> {
+  await set(ref(fb.db, `claims/${code}/${fb.uid}`), key);
+  try {
+    await set(ref(fb.db, roomPath(code, `players/${pid}/uid`)), fb.uid);
+  } finally {
+    await set(ref(fb.db, `claims/${code}/${fb.uid}`), null).catch(() => undefined);
+  }
+}
+
 /**
  * Become host with seat `pid`: a stand-in while the host's phone is away, or the creator
  * taking it back. Two steps (claim the seat, then bind it to this login); the rules decide who may.
@@ -249,6 +266,7 @@ export async function deleteRoom(fb: Fb, code: string): Promise<void> {
     [roomPath(code)]: null,
     [`roomIndex/${code}`]: null,
     [`hostKeys/${code}`]: null,
+    [`seatKeys/${code}`]: null,
     [`claims/${code}`]: null,
   });
 }

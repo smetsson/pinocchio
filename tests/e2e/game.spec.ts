@@ -151,3 +151,38 @@ test('a latecomer can jump in, and a backup host keeps the game going when the h
   await expect(ann.getByText('Round 1')).toBeVisible(); // Ann is back to a normal player
   await Promise.all(contexts.map((c) => c.close()));
 });
+
+test('a phone that lost its sign-in identity gets its own seat back (host and player)', async ({ browser }, info) => {
+  const device = info.project.use;
+  let [hostCtx, annCtx] = await Promise.all([0, 1].map(() => browser.newContext({ ...device })));
+  let host = await hostCtx.newPage();
+  let ann = await annCtx.newPage();
+  const code = await createRoom(host, 'Hostie');
+  await joinRoom(ann, code, 'Ann');
+  // Wait until both phones saved their secret seat key.
+  const hasSeatKey = (page: Page) => page.evaluate((c) => !!JSON.parse(localStorage.getItem('pinocchio:v1') ?? '{}').seats?.[c]?.seatKey, code);
+  await expect.poll(() => hasSeatKey(host)).toBe(true);
+  await expect.poll(() => hasSeatKey(ann)).toBe(true);
+
+  // Reopen each phone with its saved seats (localStorage) but a brand-new sign-in identity
+  // (Firebase keeps that in IndexedDB, which storageState() leaves out).
+  const reopen = async (ctx: typeof hostCtx) => {
+    const state = await ctx.storageState();
+    await ctx.close();
+    const fresh = await browser.newContext({ ...device, storageState: state });
+    const page = await fresh.newPage();
+    await page.goto(`/#/r/${code}`);
+    return { fresh, page };
+  };
+  ({ fresh: hostCtx, page: host } = await reopen(hostCtx));
+  await expect(host.getByTestId('host-next')).toHaveText('Start game'); // host again, no join form
+  await expect(host.getByTestId('players').locator('.player')).toHaveCount(2);
+  ({ fresh: annCtx, page: ann } = await reopen(annCtx));
+  await expect(ann.getByText('Waiting for the host to start…')).toBeVisible();
+  await expect(ann.getByTestId('players').locator('.player')).toHaveCount(2);
+
+  // And if the host disappears in the lobby, someone else can start the game.
+  await host.goto('about:blank');
+  await expect(ann.getByTestId('host-next')).toHaveText('Start game', { timeout: 40_000 });
+  await Promise.all([hostCtx, annCtx].map((c) => c.close()));
+});
