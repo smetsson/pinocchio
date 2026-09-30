@@ -57,6 +57,8 @@ Everything is set up and running. You don't need to do anything here; this is ju
    - **Round 2:** the same, with **double points**.
    - **Final round, Truth or Lie:** everyone writes one true fact and one lie about themselves; the others guess which is true.
    - **Podium & awards:** 🤥 Best Liar, 🔍 Lie Detector, 👍 Crowd Favourite, 🕵️ The Enigma.
+4. **Someone joins late?** No problem: they can open the link and jump in any time before the podium. They write lies and vote from then on (they just won't be asked about themselves in rounds 1–2).
+5. **Another round?** On the podium screen, tap **🔁 Play again with the same players**. Everyone's phone (and the big screen) moves to the new game by itself, and you get fresh questions.
 
 ### 📺 Big screen (optional)
 Everything works on phones alone, but if someone can share their screen on the call, open the **big-screen view** on that computer: **☰ → 📺 Big screen view → Open**, or go to `…/#/screen/ABCD` (your room code). It shows the join QR code, the questions, the reveals and the scores in large type. It only watches; it doesn't take a seat in the game. If a corporate laptop blocks the site, simply skip it.
@@ -74,6 +76,7 @@ Everything works on phones alone, but if someone can share their screen on the c
 - Phases **advance automatically** when everyone has answered, or when the timer runs out.
 - Each screen shows **who we're still waiting for**. As host you can tap someone there to remove them.
 - Players whose phone has been disconnected for 20+ seconds aren't waited for.
+- **If you leave the game on your phone** (e.g. to check the call chat) for more than 15 seconds, the first player who's still connected **automatically takes over as host**, so the game keeps going for everyone. Their phone says *"You're hosting until … is back"*. When you come back, you get hosting back automatically.
 - **If your phone dies:** open the game again on the same phone; you're back as host. On a *different* phone, open the **host recovery link** from the ☰ menu (save it somewhere at the start, e.g. in a private note).
 - Scoring: truth found = 1000, each player fooled by your lie = 500, each 👍 = 100. Round 2 and the final round count double.
 
@@ -83,7 +86,7 @@ Pinocchio has no accounts, so it doesn't "know" your team. Instead, the host typ
 - **Question history is kept per group.** Your work team gets fresh questions every month, even if you also play with friends on the same site.
 - Use the **same group name** each month for the same team (the name isn't case-sensitive), and a **different name** for other people.
 - Anyone who sets up a room with the same group name shares its history (no answers are stored in the history, only which questions were played and when).
-- **Who can join a room?** Only people who have its code or link, and only before the rounds start. The host can remove anyone from the ☰ menu. Rooms and all answers disappear within 24 hours after the game.
+- **Who can join a room?** Only people who have its code or link, and only until the podium. The host can remove anyone from the ☰ menu. Rooms and all answers disappear within 24 hours after the game.
 
 ### After the game
 All answers are deleted automatically within 24 hours. You can also tap **🗑️ Delete all answers now** on the final screen.
@@ -137,7 +140,7 @@ The **"questions not played yet"** counter on the *Create room* screen tells you
 |---|---|
 | Points per truth / fooled player / like, round multipliers | [`src/config/scoring.ts`](src/config/scoring.ts) |
 | Timers, number of questions per round, player limits, data retention | [`src/config/game.ts`](src/config/game.ts) |
-| All text on screen (e.g. to add Dutch) | [`src/i18n/en.ts`](src/i18n/en.ts) (copy to `nl.ts`, translate, register in `src/i18n/index.ts`, then use `?lang=nl`) |
+| All text on screen (buttons, messages, award names) | [`src/i18n/en.ts`](src/i18n/en.ts) |
 
 ---
 
@@ -169,14 +172,14 @@ For example `…/#/r/ABCD?bots=5&autoplay&fast` plays a whole game by itself in 
 | `npx firebase deploy --only database -P prod` | Upload `database.rules.json` to the live Firebase project (after changing the rules; needs `npx firebase login` once) |
 | `npm run build` | Production build into `dist/` |
 
-**Architecture.** Preact + TypeScript + Vite. `src/logic/` is pure game logic (no Firebase): `engine.ts` turns the room state into database updates. The host's phone runs it every 500 ms (`RoomScreen.tsx`). Truths and lies live under `priv/{player}` (readable only by the author and the host). The host publishes anonymised, shuffled options and keeps the answer key under `secret/`. Duplicate lies are rejected with salted hashes (`lieHashes/`), enforced by the security rules. Timers use Firebase's server clock.
+**Architecture.** Preact + TypeScript + Vite. `src/logic/` is pure game logic (no Firebase): `engine.ts` turns the room state into database updates. The host's phone runs it every 500 ms (`RoomScreen.tsx`). Truths and lies live under `priv/{player}` (readable only by the author and the host). The host publishes anonymised, shuffled options and keeps the answer key under `secret/`. Duplicate lies are rejected with salted hashes (`lieHashes/`), enforced by the security rules. Timers use Firebase's server clock. If the host's page is hidden for 15+ s mid-game, the first connected player's phone claims the host seat (`meta/hostPid`, then `meta/hostUid`; the rules only allow this while the host is away), and the room's creator (`meta/ownerPid`) takes it back on return. "Play again" writes a new room with the same players and sets `pub/next` on the old one; every phone follows.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| The timer doesn't move on | The host's phone runs the game: keep the game open (in the foreground) on the host's phone. It keeps its screen awake by itself. |
+| The timer doesn't move on | The host's phone runs the game. If the host leaves the game for 15+ seconds, another player takes over automatically; if *nobody* has the game open, it waits until someone is back. |
 | The host's phone died | Open the game again on the same phone, or open the **host recovery link** (☰ menu) on another phone. |
-| Someone can't join | Players can only join before the rounds start. Check the room code; rooms expire 24 hours after the game. |
+| Someone can't join | Players can join until the podium. Check the room code; rooms expire 24 hours after the game. |
 | A change isn't live yet | Check the **Actions** tab on GitHub: the latest **Deploy to GitHub Pages** run must be green ✅. Then refresh the page. |
 | "Something went wrong" / stuck on "Loading…" | Check https://status.firebase.google.com, and that **Anonymous** sign-in is still enabled in the Firebase console (Authentication → Sign-in method). |

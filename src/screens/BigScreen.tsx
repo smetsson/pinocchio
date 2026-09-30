@@ -9,7 +9,7 @@ import { subscribeRoom, watchServerOffset } from '../data/room';
 import { t } from '../i18n';
 import { activePids, currentSubject, isAway } from '../logic/engine';
 import type { Room } from '../logic/types';
-import { joinLink } from '../router';
+import { go, joinLink } from '../router';
 import { Avatar, QR, Timer, WaitingFor } from '../ui/components';
 import { Game, useGame, type GameContext } from '../ui/game';
 import { Loading, Logo } from '../app';
@@ -37,6 +37,10 @@ export function BigScreen({ fb, code }: { fb: Fb; code: string }) {
     return () => document.documentElement.classList.remove('bigscreen');
   }, []);
   useWakeLock(!!room && room.state.phase !== 'end');
+  const next = room?.pub?.next;
+  useEffect(() => {
+    if (next) go(`/screen/${next}`);
+  }, [next]);
 
   const now = useCallback(() => Date.now() + offset, [offset]);
   const noop = useMemo(() => ({ next() {}, extend() {}, kick() {}, end() {} }), []);

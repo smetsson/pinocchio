@@ -13,7 +13,7 @@ import {
   type Unsubscribe,
 } from 'firebase/database';
 import { GAME } from '../config/game';
-import { roomPath } from '../logic/engine';
+import { rematchRoom, roomPath } from '../logic/engine';
 import { randomId, roomCode } from '../logic/random';
 import { historyPath, type PromptHistory } from '../logic/prompts';
 import type { Meta, Player, Room, Updates } from '../logic/types';
@@ -37,7 +37,7 @@ export async function createRoom(fb: Fb, opts: CreateOptions): Promise<{ code: s
     const code = roomCode();
     const expiresAt = now + GAME.keepUnfinishedDays * 24 * 3600 * 1000;
     const room: Room = {
-      meta: { hostUid: fb.uid, hostPid: pid, createdAt: now, expiresAt, pack: opts.pack, length: opts.length, mode: opts.mode, group: opts.group },
+      meta: { hostUid: fb.uid, hostPid: pid, ownerPid: pid, createdAt: now, expiresAt, pack: opts.pack, length: opts.length, mode: opts.mode, group: opts.group },
       state: { v: 0, phase: 'lobby', q: 0, deadline: 0, step: 0 },
       players: { [pid]: { uid: fb.uid, name: opts.name, avatar: opts.avatar, joinedAt: now } },
     };
@@ -48,6 +48,31 @@ export async function createRoom(fb: Fb, opts: CreateOptions): Promise<{ code: s
         [`roomIndex/${code}`]: expiresAt,
       });
       return { code, pid, hostKey };
+    } catch {
+      // Code already in use: try another one.
+    }
+  }
+  throw new Error('Could not create a room');
+}
+
+/**
+ * "Play again": a new room with the same players and settings. The old room points to it
+ * (pub/next), so every phone moves over by itself.
+ */
+export async function startRematch(fb: Fb, oldCode: string, room: Room): Promise<{ code: string; hostKey: string }> {
+  const now = await serverNow(fb);
+  const hostKey = randomId(24);
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const code = roomCode();
+    const next = rematchRoom(room, now, fb.uid);
+    try {
+      await update(ref(fb.db), {
+        [roomPath(code)]: next,
+        [`hostKeys/${code}/${hostKey}`]: true,
+        [`roomIndex/${code}`]: next.meta.expiresAt,
+        [roomPath(oldCode, 'pub/next')]: code,
+      });
+      return { code, hostKey };
     } catch {
       // Code already in use: try another one.
     }
@@ -75,7 +100,8 @@ export async function joinRoom(fb: Fb, code: string, name: string, avatar: strin
   // Already have a seat with this device? Reuse it.
   const existing = Object.entries(players).find(([, p]) => p.uid === fb.uid && !p.kicked);
   if (existing) return { ok: true, pid: existing[0] };
-  if (phase !== 'lobby' && phase !== 'truths') return { ok: false, reason: 'started' };
+  // Latecomers can join any time before the podium (they just won't be asked about in rounds 1–2).
+  if (phase === 'end') return { ok: false, reason: 'started' };
   const active = Object.values(players).filter((p) => !p.kicked);
   if (active.length >= GAME.maxPlayers) return { ok: false, reason: 'full' };
   if (active.some((p) => p.name.trim().toLowerCase() === name.trim().toLowerCase())) return { ok: false, reason: 'name-taken' };
@@ -92,14 +118,25 @@ export async function roomExists(fb: Fb, code: string): Promise<boolean> {
   }
 }
 
-/** Host recovery: become host on this device with the secret key, and move the host's seat here. */
+/** Host recovery: become host on this device with the secret key, and move the creator's seat here. */
 export async function claimHost(fb: Fb, code: string, key: string): Promise<string> {
   await set(ref(fb.db, `claims/${code}/${fb.uid}`), key);
+  const meta = (await get(ref(fb.db, roomPath(code, 'meta')))).val() as Meta;
+  const owner = meta.ownerPid ?? meta.hostPid;
+  await set(ref(fb.db, roomPath(code, 'meta/hostPid')), owner);
   await set(ref(fb.db, roomPath(code, 'meta/hostUid')), fb.uid);
-  const hostPid = (await get(ref(fb.db, roomPath(code, 'meta/hostPid')))).val() as string;
-  await set(ref(fb.db, roomPath(code, `players/${hostPid}/uid`)), fb.uid);
+  await set(ref(fb.db, roomPath(code, `players/${owner}/uid`)), fb.uid);
   await set(ref(fb.db, `claims/${code}/${fb.uid}`), null);
-  return hostPid;
+  return owner;
+}
+
+/**
+ * Become host with seat `pid`: a stand-in while the host's phone is away, or the creator
+ * taking it back. Two steps (claim the seat, then bind it to this login); the rules decide who may.
+ */
+export async function takeHost(fb: Fb, code: string, pid: string): Promise<void> {
+  await set(ref(fb.db, roomPath(code, 'meta/hostPid')), pid);
+  await set(ref(fb.db, roomPath(code, 'meta/hostUid')), fb.uid);
 }
 
 export function write(fb: Fb, updates: Updates): Promise<void> {
@@ -121,18 +158,30 @@ export async function serverNow(fb: Fb): Promise<number> {
   return Date.now() + offsetCache;
 }
 
-/** Mark this player online; Firebase marks them offline (with a timestamp) when the connection drops. */
+/**
+ * Mark this player online; Firebase marks them away (with a timestamp) when the connection drops.
+ * Switching to another app counts as away right away: a phone can keep its connection open in
+ * the background for a minute, but the game can't run from a hidden page.
+ */
 export function trackPresence(fb: Fb, code: string, pid: string): Unsubscribe {
   const presenceRef = ref(fb.db, roomPath(code, `presence/${pid}`));
-  return onValue(ref(fb.db, '.info/connected'), async (snap) => {
+  const visible = () => typeof document === 'undefined' || document.visibilityState === 'visible';
+  const mark = () => set(presenceRef, visible() ? true : serverTimestamp()).catch(() => undefined);
+  const unsub = onValue(ref(fb.db, '.info/connected'), async (snap) => {
     if (snap.val() !== true) return;
     try {
       await onDisconnect(presenceRef).set(serverTimestamp());
-      await set(presenceRef, true);
+      await mark();
     } catch {
       /* kicked or room gone */
     }
   });
+  if (typeof document === 'undefined') return unsub;
+  document.addEventListener('visibilitychange', mark);
+  return () => {
+    unsub();
+    document.removeEventListener('visibilitychange', mark);
+  };
 }
 
 /**

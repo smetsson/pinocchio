@@ -30,6 +30,11 @@ export const GAME = {
   },
   /** Make sure every pick has at least this many options (house lies fill the gap). */
   minOptions: 3,
+  /**
+   * If the host's phone is away this long mid-game, another player's phone takes over hosting
+   * (the original host gets it back as soon as they return). Keep in sync with scripts/build-rules.mjs.
+   */
+  hostFailoverSeconds: 15,
   /** A player whose phone has been disconnected for this long is no longer waited for. */
   awayAfterSeconds: 20,
   /** Room data is deleted this long after the game ends. */

@@ -27,7 +27,7 @@ const db = (uid: string | null) => (uid ? env.authenticatedContext(uid).database
 
 function baseRoom(phase = 'lobby', extra: Record<string, unknown> = {}) {
   return {
-    meta: { hostUid: 'host', hostPid: 'p0', createdAt: now, expiresAt: now + 3600_000, pack: 'general', length: 'standard', mode: 'live', group: 'work' },
+    meta: { hostUid: 'host', hostPid: 'p0', createdAt: now, expiresAt: now + 3600_000, pack: 'general', length: 'standard', mode: 'live', group: 'work', ownerPid: 'p0' },
     state: { v: 0, phase, q: 0, deadline: 0, step: 0 },
     players: {
       p0: { uid: 'host', name: 'Host', avatar: '🦊', joinedAt: now },
@@ -87,9 +87,11 @@ describe('players', () => {
     await assertFails(db('dee').ref(`rooms/${C}/players/p1`).set({ uid: 'dee', name: 'Ann2', avatar: '🐙', joinedAt: now }));
   });
 
-  it("can't join once the rounds have started", async () => {
+  it('latecomers can join mid-game, but not after the end', async () => {
     await seed(baseRoom('r-lie'));
-    await assertFails(db('cas').ref(`rooms/${C}/players/p3`).set({ uid: 'cas', name: 'Cas', avatar: '🐙', joinedAt: now }));
+    await assertSucceeds(db('cas').ref(`rooms/${C}/players/p3`).set({ uid: 'cas', name: 'Cas', avatar: '🐙', joinedAt: now }));
+    await env.withSecurityRulesDisabled((ctx) => ctx.database().ref(`rooms/${C}/state/phase`).set('end'));
+    await assertFails(db('dee').ref(`rooms/${C}/players/p4`).set({ uid: 'dee', name: 'Dee', avatar: '🐙', joinedAt: now }));
   });
 
   it('can rename themselves but not un-kick themselves', async () => {
@@ -189,9 +191,62 @@ describe('host recovery', () => {
     await assertSucceeds(db('newphone').ref(`claims/${C}/newphone`).set('wrongkey'));
     await assertFails(db('newphone').ref(`rooms/${C}/meta/hostUid`).set('newphone'));
     await assertSucceeds(db('newphone').ref(`claims/${C}/newphone`).set('supersecret'));
+    await assertSucceeds(db('newphone').ref(`rooms/${C}/meta/hostPid`).set('p0'));
     await assertSucceeds(db('newphone').ref(`rooms/${C}/meta/hostUid`).set('newphone'));
     // ...and can then move the host's seat to the new device.
     await assertSucceeds(db('newphone').ref(`rooms/${C}/players/p0/uid`).set('newphone'));
+  });
+});
+
+describe('host failover', () => {
+  const takeOver = async (uid: string, pid: string) => {
+    await db(uid).ref(`rooms/${C}/meta/hostPid`).set(pid);
+    await db(uid).ref(`rooms/${C}/meta/hostUid`).set(uid);
+  };
+
+  it("a player can't take over while the host is online", async () => {
+    await seed({ ...baseRoom('r-lie'), presence: { p0: true, p1: true } });
+    await assertFails(takeOver('ann', 'p1'));
+  });
+
+  it('a player can stand in when the host has been away for 15+ seconds, and the creator takes it back', async () => {
+    await seed({ ...baseRoom('r-lie'), presence: { p0: now - 20_000, p1: true } });
+    await assertFails(takeOver('bob', 'p1')); // must be your own seat
+    await assertSucceeds(takeOver('ann', 'p1'));
+    // The stand-in host can now run the game (read everything, advance)...
+    await assertSucceeds(db('ann').ref(`rooms/${C}`).get());
+    // ...and the creator takes hosting back when they return.
+    await assertSucceeds(takeOver('host', 'p0'));
+    await assertFails(db('ann').ref(`rooms/${C}`).get());
+  });
+
+  it('only when the host was away briefly = no takeover', async () => {
+    await seed({ ...baseRoom('r-lie'), presence: { p0: now - 5_000, p1: true } });
+    await assertFails(takeOver('ann', 'p1'));
+  });
+
+  it('no takeover in the lobby or days ahead in pre-call mode', async () => {
+    await seed({ ...baseRoom('lobby'), presence: { p0: now - 60_000 } });
+    await assertFails(takeOver('ann', 'p1'));
+    const precall = baseRoom('truths');
+    precall.meta.mode = 'precall';
+    await seed({ ...precall, presence: { p0: now - 60_000 } });
+    await assertFails(takeOver('ann', 'p1'));
+  });
+
+  it("the room's creator can't be changed", async () => {
+    await seed(baseRoom());
+    await assertFails(db('host').ref(`rooms/${C}/meta/ownerPid`).set('p1'));
+  });
+});
+
+describe('rematch', () => {
+  it('the host can create the next room with the same players and point everyone to it', async () => {
+    await seed(baseRoom('end'));
+    const next = baseRoom('lobby');
+    await assertSucceeds(db('host').ref().update({ 'rooms/NEXT': next, [`rooms/${C}/pub/next`]: 'NEXT' }));
+    await assertFails(db('ann').ref(`rooms/${C}/pub/next`).set('EVIL'));
+    await assertSucceeds(db('ann').ref('rooms/NEXT/players').get());
   });
 });
 

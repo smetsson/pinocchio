@@ -42,7 +42,17 @@ test('three phones play a full game from lobby to podium', async ({ browser, bro
   for (const label of ['truths', 'lie', 'pick', 'next', 'final-write', 'final-pick']) expect(seen, `never did: ${label}`).toContain(label);
   await expect(host.getByTestId('scoreboard').locator('.points-row')).toHaveCount(3);
   await expect(screen.getByTestId('podium')).toBeVisible();
-  await expect(screen.getByRole('button', { name: 'New game' })).toHaveCount(0);
+  await expect(screen.getByRole('button', { name: /New game/ })).toHaveCount(0);
+
+  // "Play again": everyone (and the big screen) moves to a fresh lobby with the same players.
+  await host.getByTestId('play-again').click();
+  const nextCode = (await host.getByTestId('room-code').textContent())!.trim();
+  expect(nextCode).not.toBe(code);
+  for (const page of pages) {
+    await expect(page.getByTestId('room-code')).toHaveText(nextCode);
+    await expect(page.getByTestId('players').locator('.player')).toHaveCount(3);
+  }
+  await expect(screen.locator('.room-code')).toHaveText(nextCode);
   await screenCtx.close();
   void browserName;
   await Promise.all(contexts.map((c) => c.close()));
@@ -94,4 +104,40 @@ test('pre-call mode: answer days ahead, and the host can recover on a new phone'
   await newPhone.getByTestId('host-next').click();
   await expect(newPhone.getByText('Round 1')).toBeVisible();
   await Promise.all([annCtx, bobCtx, newPhoneCtx].map((c) => c.close()));
+});
+
+test('a latecomer can jump in, and a backup host keeps the game going when the host drops', async ({ browser }, info) => {
+  const device = info.project.use;
+  const contexts = await Promise.all([0, 1, 2, 3].map(() => browser.newContext({ ...device })));
+  const [host, ann, bob, late] = await Promise.all(contexts.map((c) => c.newPage()));
+  const code = await createRoom(host, 'Hostie', { short: true });
+  await joinRoom(ann, code, 'Ann');
+  await joinRoom(bob, code, 'Bob');
+  await host.getByTestId('host-next').click();
+  for (const page of [host, ann, bob]) await step(page, false); // answer truths
+  await expect(host.getByTestId('host-next')).toHaveText(/Skip/);
+  await expect(host.getByText('Round 1')).toBeVisible();
+
+  // A latecomer joins mid-round and can play right away.
+  await late.goto(`/#/r/${code}`);
+  await expect(late.getByText(/already going/)).toBeVisible();
+  await late.getByPlaceholder('e.g. Sofie').fill('Latecomer');
+  await late.getByRole('button', { name: 'Join the game' }).click();
+  await expect(late.getByText('Round 1')).toBeVisible();
+
+  // The host's phone drops out: after ± 15 s, the first connected player (Ann) stands in.
+  await host.goto('about:blank');
+  await expect(ann.getByTestId('host-next')).toBeVisible({ timeout: 40_000 });
+  await expect(ann.getByText(/You're hosting until Hostie is back/)).toBeVisible();
+  await expect(bob.getByTestId('host-next')).toHaveCount(0);
+  // ...and the game keeps moving: once the connected players have lied, the stand-in moves on to picking.
+  for (const page of [ann, bob, late]) await step(page, false);
+  await expect(bob.getByText('Find the truth!').or(bob.getByText('Who will find your truth?'))).toBeVisible({ timeout: 15_000 });
+
+  // The host comes back and automatically gets hosting back.
+  await host.goto(`/#/r/${code}`);
+  await expect(host.getByTestId('host-next')).toBeVisible({ timeout: 15_000 });
+  await expect(ann.getByTestId('host-next')).toHaveCount(0, { timeout: 15_000 });
+  await expect(ann.getByText('Round 1')).toBeVisible(); // Ann is back to a normal player
+  await Promise.all(contexts.map((c) => c.close()));
 });

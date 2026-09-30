@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Fb } from '../data/firebase';
 import { getPack } from '../data/packs';
-import { claimHost, subscribeRoom, trackPresence, watchHistory, watchServerOffset, write } from '../data/room';
+import { claimHost, subscribeRoom, takeHost, trackPresence, watchHistory, watchServerOffset, write } from '../data/room';
 import { session } from '../data/session';
 import { t } from '../i18n';
 import * as engine from '../logic/engine';
@@ -65,6 +65,8 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
         if (hostNow !== isHost) setIsHost(hostNow);
       },
       (_e, path) => {
+        // Lost host rights (the creator took hosting back): continue as a normal player.
+        if (path === '' && isHost) return setIsHost(false);
         if (path === '' || path === 'meta') setStatus('missing');
       },
     );
@@ -141,6 +143,15 @@ export function RoomScreen({ fb, code, params }: { fb: Fb; code: string; params:
   );
 
   useHostLoop(isHost && status === 'ready', roomRef, engineCtx, fb);
+
+  // "Play again": follow everyone to the new room.
+  const next = room?.pub?.next;
+  useEffect(() => {
+    if (!next || !pid) return;
+    session.saveSeat(next, { pid });
+    go(`/r/${next}`);
+  }, [next, pid]);
+  useHostFailover(status === 'ready' && !!pid && !kicked, fb, code, pid, roomRef, now);
 
   // Dev: #/r/CODE?bots=5 adds bot players once.
   const botsStarted = useRef(false);
@@ -224,6 +235,32 @@ function useHostHistory(fb: Fb, group: string, pack: string | undefined) {
     return watchHistory(fb, group, pack, (h) => (ref.current = h));
   }, [fb, group, pack]);
   return ref;
+}
+
+/**
+ * If the host's phone is away mid-game, the first connected player stands in as host so the
+ * game keeps going. The room's creator takes hosting back as soon as they're here again.
+ */
+function useHostFailover(enabled: boolean, fb: Fb, code: string, pid: string | undefined, roomRef: { current: Room | null }, now: () => number) {
+  useEffect(() => {
+    if (!enabled || !pid) return;
+    let busy = false;
+    const id = setInterval(async () => {
+      const room = roomRef.current;
+      if (!room || busy || room.meta.hostUid === fb.uid || document.visibilityState !== 'visible') return;
+      const reclaim = engine.ownerPid(room) === pid && room.state.phase !== 'end';
+      if (!reclaim && engine.backupHost(room, now()) !== pid) return;
+      busy = true;
+      try {
+        await takeHost(fb, code, pid);
+      } catch {
+        /* someone else was quicker, or the host is back */
+      } finally {
+        busy = false;
+      }
+    }, 2000);
+    return () => clearInterval(id);
+  }, [enabled, fb, code, pid, now]);
 }
 
 /** The host's phone drives the game: auto-advance on timeouts / when everyone is done. */

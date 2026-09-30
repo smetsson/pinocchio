@@ -119,18 +119,30 @@ export function runBot(fb: Fb, code: string, pid: string, speed: number, ownFb =
     }
   };
 
-  const unsubRoom = subscribeRoom(fb, code, pid, false, (r) => {
+  // "Play again": follow the players to the next room.
+  let followed: (() => void) | null = null;
+  let unsubRoom: (() => void) | undefined;
+  unsubRoom = subscribeRoom(fb, code, pid, false, (r) => {
     room = r;
-    if (r) act(r);
+    if (r?.pub?.next && !followed) {
+      stopHere();
+      followed = runBot(fb, r.pub.next, pid, speed, ownFb);
+      return;
+    }
+    if (r && !followed) act(r);
   });
   const unsubPresence = ownFb ? () => {} : trackPresence(fb, code, pid);
   // Re-check periodically (e.g. prompts dealt after joining).
   const interval = setInterval(() => room && act(room), 3000);
 
-  return () => {
+  function stopHere() {
     clearInterval(interval);
-    unsubRoom();
+    unsubRoom?.();
     unsubPresence();
-    if (!ownFb) void closeFb(fb);
+  }
+  return () => {
+    stopHere();
+    if (followed) followed(); // closes the connection itself
+    else if (!ownFb) void closeFb(fb);
   };
 }

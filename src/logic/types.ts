@@ -16,8 +16,12 @@ export type Phase =
   | 'end'; // podium + awards
 
 export interface Meta {
+  /** Auth user of whoever is hosting right now (the creator, or a stand-in while they're away). */
   hostUid: string;
+  /** Seat that is hosting right now. */
   hostPid: Pid;
+  /** Seat of the player who created the room; they always get hosting back when they return. */
+  ownerPid?: Pid;
   createdAt: number;
   expiresAt: number;
   pack: string;
@@ -131,6 +135,8 @@ export interface Pub {
   final?: FinalQuestion[];
   finalReveal?: Record<string, FinalReveal>;
   awards?: Award[];
+  /** Room code of the rematch; everyone's phone follows it. */
+  next?: string;
 }
 
 /** Everything under /rooms/{code}. The host can read all of it; players only parts. */

@@ -14,6 +14,7 @@ import type {
   GameState,
   Option,
   Pid,
+  Player,
   PromptPack,
   Question,
   Reveal,
@@ -511,6 +512,54 @@ export function extend(room: Room, ctx: Ctx): Updates | null {
 
 export function kick(ctx: Ctx, pid: Pid): Updates {
   return { [roomPath(ctx.code, `players/${pid}/kicked`)]: true };
+}
+
+// ---------- Host failover ----------
+
+/** The player who created the room (gets hosting back whenever they're around). */
+export function ownerPid(room: Room): Pid {
+  return room.meta.ownerPid ?? room.meta.hostPid;
+}
+
+/** Failover only makes sense while a game is being played (not days ahead in pre-call mode). */
+export function failoverAllowed(room: Room): boolean {
+  const { phase } = room.state;
+  if (phase === 'lobby' || phase === 'end') return false;
+  if (phase === 'truths' && room.meta.mode === 'precall') return false;
+  return true;
+}
+
+/**
+ * When the host's phone has been away for a while mid-game, the first connected player
+ * (in join order) takes over. Returns that player's seat, or undefined if no takeover is needed.
+ */
+export function backupHost(room: Room, now: number): Pid | undefined {
+  if (!failoverAllowed(room)) return undefined;
+  const hostPresence = room.presence?.[room.meta.hostPid];
+  if (typeof hostPresence !== 'number' || now - hostPresence < GAME.hostFailoverSeconds * 1000) return undefined;
+  return activePids(room).find((pid) => pid !== room.meta.hostPid && room.presence?.[pid] === true);
+}
+
+/** Take over hosting (stand-in) or take it back (owner). The security rules check who may do this. */
+export function becomeHost(code: string, pid: Pid, uid: string): Updates {
+  return { [roomPath(code, 'meta/hostUid')]: uid, [roomPath(code, 'meta/hostPid')]: pid };
+}
+
+// ---------- Rematch ----------
+
+/** A fresh room with the same players and settings (live mode). The host writes it in one go. */
+export function rematchRoom(room: Room, now: number, hostUid: string): Room {
+  const expiresAt = now + GAME.keepUnfinishedDays * 24 * 3600 * 1000;
+  const players: Record<Pid, Player> = {};
+  activePids(room).forEach((pid, i) => {
+    const p = room.players![pid];
+    players[pid] = { uid: p.uid, name: p.name, avatar: p.avatar, joinedAt: now + i };
+  });
+  return {
+    meta: { ...room.meta, hostUid, ownerPid: room.meta.hostPid, createdAt: now, expiresAt, mode: 'live' },
+    state: { v: 0, phase: 'lobby', q: 0, deadline: 0, step: 0 },
+    players,
+  };
 }
 
 /** Final standings, best first. */

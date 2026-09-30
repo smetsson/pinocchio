@@ -17,12 +17,22 @@ const isHost = `${R('/meta/hostUid')}.val() === auth.uid`;
 const host = `${signedIn} && ${isHost} && ${alive}`;
 const pub = `${signedIn} && ${alive}`;
 const me = `${signedIn} && ${alive} && ${R("/players/' + $pid + '/uid")}.val() === auth.uid && ${R("/players/' + $pid + '/kicked")}.val() !== true`;
-const phase = (p) => `${R('/state/phase')}.val() === '${p}'`;
+const phase = (p) => `(${R('/state/phase')}.val() === '${p}')`;
 const atQ = (v) => `${R('/state/q')}.val() + '' === ${v}`;
 const subjectOfQ = `${R("/pub/questions/' + $q + '/subject")}.val()`;
 const mine = `${R("/toPlayer/' + $pid + '/mine/' + $q + '")}.val()`;
 const str = (max) => `newData.isString() && newData.val().length > 0 && newData.val().length <= ${max}`;
 const MAX_TTL = 15 * 24 * 3600 * 1000;
+const mode = (m) => `(${R('/meta/mode')}.val() === '${m}')`;
+// Host failover (keep 15000 in sync with GAME.hostFailoverSeconds in src/config/game.ts).
+const HOST_AWAY_MS = 15000;
+const hostPresence = `${R("/presence/' + " + R('/meta/hostPid') + ".val() + '")}`;
+const hostAway = `(${hostPresence}.isNumber() && ${hostPresence}.val() < now - ${HOST_AWAY_MS})`;
+const gameRunning = `!${phase('lobby')} && !${phase('end')} && !(${phase('truths')} && ${mode('precall')})`;
+const seatIsMine = (pidExpr) => `${R("/players/' + " + pidExpr + " + '/uid")}.val() === auth.uid && ${R("/players/' + " + pidExpr + " + '/kicked")}.val() !== true`;
+const ownerPidExpr = `${R('/meta/ownerPid')}.val()`;
+// Guard with isString(): gluing a missing claim into a path is an error, and an error makes the whole rule false.
+const claimOk = `(root.child('claims/' + $code + '/' + auth.uid).isString() && root.child('hostKeys/' + $code + '/' + root.child('claims/' + $code + '/' + auth.uid).val()).exists())`;
 const roomGone = `(!${R('')}.exists() || ${R('/meta/expiresAt')}.val() < now || ${isHost})`;
 
 const rules = {
@@ -38,13 +48,23 @@ const rules = {
           '.read': pub,
           '.write': host,
           '.validate': "newData.hasChildren(['hostUid', 'hostPid', 'createdAt', 'expiresAt', 'pack', 'length', 'mode'])",
-          // Host recovery: whoever knows the secret host key may take over.
+          // Becoming host is two steps. 1) Claim the host seat (hostPid), allowed for:
+          //  - the room's creator, taking hosting back after a stand-in took over,
+          //  - anyone with the secret host key (host recovery link),
+          //  - a player standing in while the host's phone has been away for 15+ seconds mid-game.
+          // 2) Bind it to your login (hostUid): only whoever owns the host seat (or holds the key).
           hostUid: {
-            '.write': `${signedIn} && ${alive} && newData.val() === auth.uid && root.child('hostKeys/' + $code + '/' + root.child('claims/' + $code + '/' + auth.uid).val()).exists()`,
+            '.write': `${signedIn} && ${alive} && newData.val() === auth.uid && (${claimOk} || ${seatIsMine(R('/meta/hostPid') + '.val()')})`,
             '.validate': 'newData.isString()',
           },
+          hostPid: {
+            '.write': `${signedIn} && ${alive} && (
+              (newData.val() === ${ownerPidExpr} && (${claimOk} || ${seatIsMine(ownerPidExpr)}))
+              || (${seatIsMine('newData.val()')} && ${hostAway} && ${gameRunning}))`,
+            '.validate': str(40),
+          },
+          ownerPid: { '.validate': `${str(40)} && (!data.exists() || newData.val() === data.val())` },
           expiresAt: { '.validate': `newData.isNumber() && newData.val() <= now + ${MAX_TTL}` },
-          hostPid: { '.validate': str(40) },
           createdAt: { '.validate': 'newData.isNumber()' },
           pack: { '.validate': str(40) },
           length: { '.validate': "newData.val() === 'short' || newData.val() === 'standard'" },
@@ -56,7 +76,7 @@ const rules = {
           '.read': pub,
           $pid: {
             '.write': `${signedIn} && ${alive} && (
-              (!data.exists() && newData.child('uid').val() === auth.uid && (${phase('lobby')} || ${phase('truths')}))
+              (!data.exists() && newData.child('uid').val() === auth.uid && !${phase('end')})
               || (data.child('uid').val() === auth.uid && newData.child('uid').val() === auth.uid && newData.child('kicked').val() === data.child('kicked').val())
               || ${isHost})`,
             '.validate': "newData.hasChildren(['uid', 'name', 'avatar', 'joinedAt'])",

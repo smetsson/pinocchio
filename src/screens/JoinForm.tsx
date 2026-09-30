@@ -19,7 +19,8 @@ export function JoinForm({ fb, code, room, onJoined }: { fb: Fb; code: string; r
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const started = room.state.phase !== 'lobby' && room.state.phase !== 'truths';
+  const started = room.state.phase === 'end';
+  const inProgress = !started && room.state.phase !== 'lobby' && room.state.phase !== 'truths';
 
   const join = async (e: Event) => {
     e.preventDefault();
@@ -60,6 +61,7 @@ export function JoinForm({ fb, code, room, onJoined }: { fb: Fb; code: string; r
     <form class="page" onSubmit={join}>
       <Logo small />
       <h1 class="center">{t.join.title(code)}</h1>
+      {inProgress && <p class="card small center">{t.join.inProgress}</p>}
       <div class="players">
         {Object.values(room.players ?? {})
           .filter((p) => !p.kicked)

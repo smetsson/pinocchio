@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { t } from '../../i18n';
 import { standings } from '../../logic/engine';
-import { deleteRoom } from '../../data/room';
+import { deleteRoom, startRematch } from '../../data/room';
 import { session } from '../../data/session';
 import { go } from '../../router';
 import { Avatar, confetti } from '../../ui/components';
@@ -9,9 +9,10 @@ import { useGame } from '../../ui/game';
 import { Scoreboard } from './Scoreboard';
 
 export function End() {
-  const { room, isHost, fb, code, spectator } = useGame();
+  const { room, isHost, fb, code, spectator, pid } = useGame();
   const rows = standings(room);
   const [deleted, setDeleted] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const a = setTimeout(() => confetti(2500), 1800);
@@ -72,6 +73,27 @@ export function End() {
       <h2>{t.scores.title}</h2>
       <Scoreboard />
 
+      {isHost && !deleted && (
+        <button
+          class="btn"
+          disabled={busy}
+          data-testid="play-again"
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const { code: next, hostKey } = await startRematch(fb, code, room);
+              session.saveSeat(next, { pid, hostKey });
+              go(`/r/${next}`);
+            } catch {
+              setBusy(false);
+            }
+          }}
+        >
+          🔁 {t.end.playAgain}
+        </button>
+      )}
+      {!isHost && !spectator && <p class="small muted center">{t.end.playAgainHint}</p>}
+
       <p class="small muted center">{t.end.autoDelete}</p>
       {isHost && !deleted && (
         <button
@@ -89,13 +111,13 @@ export function End() {
       )}
       {!spectator && (
         <button
-          class="btn"
+          class="btn secondary"
           onClick={() => {
             session.forget(code);
             go(isHost ? '/new' : '/');
           }}
         >
-          {t.end.newGame}
+          {isHost ? t.end.newGame : t.end.leave}
         </button>
       )}
     </>

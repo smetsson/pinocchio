@@ -1,6 +1,5 @@
 /**
- * 🌍 All UI text lives here. To add Dutch: copy this file to nl.ts, translate the
- * values (keep the keys), and register it in src/i18n/index.ts.
+ * 💬 All text on screen lives here: change the wording in one place.
  */
 export const en = {
   appName: 'Pinocchio',
@@ -70,7 +69,8 @@ export const en = {
     join: 'Join the game',
     joining: 'Joining…',
     notFound: "That room doesn't exist (or has expired).",
-    started: 'This game has already started. Ask the host to start a new room.',
+    started: 'This game has already finished. Ask the host to start a new room.',
+    inProgress: '⏱️ The game is already going: jump in! You can write lies and vote right away.',
     full: 'This room is full.',
     nameTaken: 'Someone already uses that name. Pick another one!',
     kicked: 'The host removed you from this game.',
@@ -190,7 +190,10 @@ export const en = {
     deleteConfirm: 'Delete this room and all answers now? This cannot be undone.',
     deleted: 'Room deleted. Thanks for playing!',
     autoDelete: 'All answers are deleted automatically within 24 hours.',
-    newGame: 'New game',
+    newGame: 'New game (other settings)',
+    playAgain: 'Play again with the same players',
+    playAgainHint: 'If the host starts a new game, your phone joins it automatically.',
+    leave: 'Leave',
   },
 
   waiting: {
@@ -213,7 +216,8 @@ export const en = {
     endConfirm: 'End the game now and go to the final scores?',
     recoveryLink: 'Host recovery link',
     recoveryHint: 'Open this on another phone if yours breaks, to take over as host. Keep it secret!',
-    hostLost: 'The host is reconnecting…',
+    hostLost: 'The host is reconnecting… Someone else takes over in a few seconds if needed.',
+    standingIn: (name: string) => `👑 You're hosting until ${name} is back. Tap Next to keep the game going!`,
     theme: 'Theme',
     startTruthsFirst: 'Start the game (with everyone who answered)',
   },
