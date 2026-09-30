@@ -32,6 +32,7 @@ Everything is set up and running. You don't need to do anything here; this is ju
 | 💻 The code | https://github.com/smetsson/pinocchio: every change committed to `main` is published automatically (± 1 minute, see the **Actions** tab) |
 | 🔥 The backend | Firebase project **`pinocchio-smetsson`**: https://console.firebase.google.com/project/pinocchio-smetsson (Realtime Database in Belgium, anonymous sign-in) |
 | 🧹 Clean-up | GitHub Action **Delete expired rooms** runs every night; it uses the `FIREBASE_SERVICE_ACCOUNT` secret |
+| 🔒 Key lock | The Firebase web key only works from `smetsson.github.io` (and Firebase's own sign-in domain), so other websites can't use your free quota. If you ever move the game to another address, add it in [Google Cloud → Credentials](https://console.cloud.google.com/apis/credentials?project=pinocchio-smetsson) → *Browser key* → *Website restrictions*. |
 
 > GitHub pauses scheduled workflows in repositories with no activity for 60 days. Adding a monthly prompt pack keeps it active; if it's ever paused, the Actions tab shows a button to re-enable it. Expired rooms are unreadable either way.
 
