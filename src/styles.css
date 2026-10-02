@@ -1409,18 +1409,3 @@ html.bigscreen:has(.round-intro--full),
 html.bigscreen:has(.round-intro--full) body {
   overflow: hidden;
 }
-
-/* Answers are shown in capitals, so nobody can tell who capitalises and who doesn't. */
-.answer-text,
-.option-btn,
-.tf-option,
-.reveal-card .answer,
-.prompt .blank {
-  text-transform: uppercase;
-}
-.option-btn .tag,
-.tf-option .small,
-.tf-option .player-mini,
-.reveal-card.drumroll .answer {
-  text-transform: none;
-}

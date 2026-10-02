@@ -1,5 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { answerHash, cleanAnswer, normalize } from '../../src/logic/normalize';
+import { answerHash, cleanAnswer, displayAnswer, normalize } from '../../src/logic/normalize';
+
+describe('displayAnswer (Title Case)', () => {
+  it('shows everyone the same way, however they typed it', () => {
+    for (const typed of ['taylor swift', 'Taylor Swift', 'TAYLOR SWIFT', 'Taylor swift']) expect(displayAnswer(typed)).toBe('Taylor Swift');
+    expect(displayAnswer('hippo')).toBe('Hippo');
+    expect(displayAnswer('fries with mayonnaise')).toBe('Fries with Mayonnaise');
+    expect(displayAnswer('the lord of the rings')).toBe('The Lord of the Rings');
+  });
+  it('keeps deliberate capitals, numbers, punctuation and emoji', () => {
+    expect(displayAnswer('my iPhone')).toBe('My iPhone');
+    expect(displayAnswer("dinner at McDonald's")).toBe("Dinner at McDonald's");
+    expect(displayAnswer('pink BMX')).toBe('Pink BMX');
+    expect(displayAnswer('12 pancakes')).toBe('12 Pancakes');
+    expect(displayAnswer('a hair dryer (the hotel had one)')).toBe('A Hair Dryer (The Hotel Had One)');
+    expect(displayAnswer('café crème 🍰')).toBe('Café Crème 🍰');
+  });
+});
 
 describe('cleanAnswer', () => {
   it('tidies spacing and trailing punctuation', () => {

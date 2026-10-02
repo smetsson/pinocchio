@@ -3,7 +3,7 @@ import { t } from '../../i18n';
 import { SCORING } from '../../config/scoring';
 import { checkFinal, finalUpdates, finalVoteUpdates } from '../../logic/actions';
 import { hasSubmitted } from '../../logic/engine';
-import { MAX_ANSWER } from '../../logic/normalize';
+import { MAX_ANSWER, displayAnswer } from '../../logic/normalize';
 import { Avatar, PlayerMini, Progress, Timer, WaitingFor, buzz, confetti } from '../../ui/components';
 import { useGame } from '../../ui/game';
 
@@ -108,7 +108,7 @@ export function FinalPick() {
               void act(finalVoteUpdates(code, pid, i, idx as 0 | 1));
             }}
           >
-            {text}
+            {displayAnswer(text)}
           </button>
         ))}
       </div>
@@ -147,7 +147,7 @@ export function FinalReveal() {
           return (
             <div key={`${idx}-${shown}`} class={`tf-option ${shown ? (isTrue ? 'is-true' : 'is-lie') : ''}`}>
               {shown && <span class="stamp" style={{ '--stamp-delay': '0s', ...(isTrue ? {} : { color: 'var(--lie)', borderColor: 'var(--lie)' }) }}>{isTrue ? t.final.trueLabel : t.final.lieLabel}</span>}
-              <span class="answer-text">{text}</span>
+              <span>{displayAnswer(text)}</span>
               <div class="pickers">
                 {votersFor(idx).map((p, k) => (
                   <PlayerMini key={p} pid={p} delay={0.2 + k * 0.12} />

@@ -3,6 +3,7 @@ import type { ComponentChildren } from 'preact';
 import QRCode from 'qrcode';
 import { t } from '../i18n';
 import { isAway, hasSubmitted, expectedPids, statusKey } from '../logic/engine';
+import { displayAnswer } from '../logic/normalize';
 import type { Pid, Player } from '../logic/types';
 import { useGame } from './game';
 
@@ -287,7 +288,7 @@ export function PromptText({ template, name, fill }: { template: string; name?: 
   return (
     <p class="prompt">
       {before}
-      <span class="blank">{fill ?? '    '}</span>
+      <span class="blank">{fill ? displayAnswer(fill) : '    '}</span>
       {after ?? ''}
     </p>
   );

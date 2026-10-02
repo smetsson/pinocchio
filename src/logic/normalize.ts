@@ -42,13 +42,36 @@ export function answerHash(text: string, roomCode: string, q: number): string {
  * spaces, no trailing full stop or exclamation mark. For "label" questions ("My favourite
  * animal: ____") or questions that already contain the article ("I'd be a ____"), a leading
  * a/an/the is dropped too, so "a hippo" and "hippo" end up the same.
- * (Capitalisation is evened out on screen: answers are shown in capitals.)
+ * (Capitalisation is evened out on screen: see displayAnswer.)
  */
 export function cleanAnswer(text: string, template?: string): string {
   let s = text.replace(/\s+/g, ' ').trim().replace(/[.!,;:]+$/, '').trim();
   const beforeBlank = template?.split('____')[0].trimEnd() ?? '';
   if (/(:|\b(a|an|the))$/i.test(beforeBlank)) s = s.replace(/^(a|an|the)\s+/i, '');
   return s;
+}
+
+const SMALL_WORDS = new Set(['a', 'an', 'the', 'and', 'or', 'but', 'nor', 'of', 'with', 'in', 'on', 'at', 'to', 'for', 'by', 'from', 'as', 'per', 'vs', 'via', 'into', 'up']);
+
+/**
+ * How answers are shown: Title Case, so nobody's capitalisation habits give them away.
+ * "taylor swift" / "TAYLOR SWIFT" -> "Taylor Swift", "fries with mayonnaise" -> "Fries with Mayonnaise".
+ * Words with deliberate capitals inside them are kept as typed: iPhone, McDonald's, BMX, K3.
+ */
+export function displayAnswer(text: string): string {
+  const letters = text.replace(/[^\p{L}]/gu, '');
+  // Typed entirely in capitals: treat as lowercase first.
+  const base = letters.length > 1 && letters === letters.toUpperCase() && letters !== letters.toLowerCase() ? text.toLowerCase() : text;
+  let first = true;
+  return base.replace(/\S+/g, (word) => {
+    const i = word.search(/\p{L}/u);
+    if (i < 0) return word; // numbers, emoji, punctuation
+    const isFirst = first;
+    first = false;
+    if (/\p{Lu}/u.test(word.slice(i + 1))) return word; // iPhone, McDonald's, BMX
+    if (!isFirst && SMALL_WORDS.has(word.toLowerCase())) return word.toLowerCase();
+    return word.slice(0, i) + word[i].toUpperCase() + word.slice(i + 1);
+  });
 }
 
 /** Answer length limits (characters). */

@@ -5,6 +5,7 @@ import { currentRound } from '../../logic/engine';
 import type { RevealStep } from '../../logic/types';
 import { Avatar, PlayerMini, confetti } from '../../ui/components';
 import { useGame } from '../../ui/game';
+import { displayAnswer } from '../../logic/normalize';
 import { PinocchioIcon } from '../../ui/PinocchioIcon';
 import { QuestionHeader } from './QuestionHeader';
 
@@ -75,7 +76,7 @@ function RevealCard({ step }: { step: RevealStep }) {
 
   return (
     <div class={`reveal-card ${step.kind}`} style={{ '--stamp-delay': `${stampDelay}s` }} data-testid="reveal-card">
-      <div class="answer">“{step.text}”</div>
+      <div class="answer">“{displayAnswer(step.text)}”</div>
       <div class="col" style={{ gap: '6px' }}>
         <span class="small muted">{pickers.length ? t.reveal.pickedBy : step.kind === 'truth' ? t.reveal.nobodyFound : t.reveal.nobody}</span>
         <div class="pickers">
@@ -123,7 +124,7 @@ function Summary({ truthText }: { truthText: string }) {
       <div class="reveal-card truth" style={{ padding: '14px' }}>
         <span class="small muted">{t.reveal.truth}</span>
         <div class="answer" style={{ fontSize: '24px' }}>
-          “{truthText}”
+          “{displayAnswer(truthText)}”
         </div>
       </div>
       {unpicked.length > 0 && (
@@ -132,7 +133,7 @@ function Summary({ truthText }: { truthText: string }) {
           {unpicked.map((s) => (
             <div class="points-row" key={s.optId}>
               <span>
-                <span class="answer-text">“{s.text}”</span> <span class="muted small">— {s.kind === 'house' ? t.reveal.houseLie : room.players?.[s.author ?? '']?.name}</span>
+                <span>“{displayAnswer(s.text)}”</span> <span class="muted small">— {s.kind === 'house' ? t.reveal.houseLie : room.players?.[s.author ?? '']?.name}</span>
               </span>
               {s.likes > 0 && <span class="pts">{t.reveal.likes(s.likes)}</span>}
             </div>

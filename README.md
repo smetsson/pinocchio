@@ -77,7 +77,7 @@ Everything works on phones alone, but if someone can share their screen on the c
 | **☰ menu** | Remove a player, copy the join link, copy your **host recovery link**, end the game now, delete the room. |
 
 - Phases **advance automatically** when everyone has answered, or when the timer runs out.
-- **Answers are shown in capitals** and tidied (spacing, full stops), so nobody's typing habits give them away.
+- **Answers are shown in Title Case** ("Taylor Swift", "Fries with Mayonnaise") and tidied (spacing, full stops), so nobody's typing habits give them away.
 - Each screen shows **who we're still waiting for**. As host you can tap someone there to remove them.
 - Players whose phone has been disconnected for 20+ seconds aren't waited for.
 - **If you leave the game on your phone** (e.g. to check the call chat) for more than 15 seconds, the first player who's still connected **automatically takes over as host**, so the game keeps going for everyone. Their phone says *"You're hosting until … is back"*. When you come back, you get hosting back automatically.

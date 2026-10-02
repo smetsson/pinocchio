@@ -1,7 +1,7 @@
 import { t } from '../../i18n';
 import { likeUpdates, voteUpdates } from '../../logic/actions';
 import { currentSubject } from '../../logic/engine';
-import { normalize } from '../../logic/normalize';
+import { displayAnswer, normalize } from '../../logic/normalize';
 import { Progress, WaitingFor, buzz } from '../../ui/components';
 import { useGame } from '../../ui/game';
 import { QuestionHeader } from './QuestionHeader';
@@ -40,7 +40,7 @@ export function Pick() {
                 }}
               >
                 {isMine && <span class="tag">{isSubject ? t.pick.yourTruth : t.pick.yours}</span>}
-                {o.text}
+                {displayAnswer(o.text)}
               </button>
               {canLike && !isMine && (
                 <button
