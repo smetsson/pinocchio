@@ -44,7 +44,7 @@ Everything is set up and running. You don't need to do anything here; this is ju
 ### Before the call (optional but recommended)
 1. Open the game on your phone → **Create a room**.
 2. Enter your name, pick an avatar, and fill in **Who is playing?** (e.g. `Work team`). Pinocchio remembers which questions each group has already played (see [Groups](#groups-playing-with-different-people)).
-3. Choose the **question pack** and **game length** (*Short* ≈ 20 min, *Standard* ≈ 30 min with 6 players).
+3. Choose the **question pack** and **game length**: *Short* plays 3 + 3 questions (≈ 20 min); *Full* plays every player's 2 answers (≈ 40 min with 6 players).
 4. Choose when people answer the personal questions:
    - **📅 Before the call:** share the link a few days ahead. Everyone answers 2 questions about themselves in their own time. The call itself is then pure play.
    - **⚡ Live:** everyone answers at the start of the game (± 3 minutes).
@@ -77,6 +77,7 @@ Everything works on phones alone, but if someone can share their screen on the c
 | **☰ menu** | Remove a player, copy the join link, copy your **host recovery link**, end the game now, delete the room. |
 
 - Phases **advance automatically** when everyone has answered, or when the timer runs out.
+- **Answers are shown in capitals** and tidied (spacing, full stops), so nobody's typing habits give them away.
 - Each screen shows **who we're still waiting for**. As host you can tap someone there to remove them.
 - Players whose phone has been disconnected for 20+ seconds aren't waited for.
 - **If you leave the game on your phone** (e.g. to check the call chat) for more than 15 seconds, the first player who's still connected **automatically takes over as host**, so the game keeps going for everyone. Their phone says *"You're hosting until … is back"*. When you come back, you get hosting back automatically.
@@ -128,6 +129,7 @@ Prompt packs are simple JSON files in the [`prompts/`](prompts/) folder. The gam
 - `me`: the question in first person, with `____` for the answer.
 - `them`: the same question about someone else, with `{name}` and `____`.
 - `lies`: 3–6 believable fake answers, used by **🎲 Lie for me** and to fill in when few people lied.
+- If the answer is usually *one ordinary thing* (an animal, a gadget, a costume), write the question as a label: `"My favourite animal: ____"`, with suggestions without "a/an/the" (`"red panda"`). The game then drops a leading "a/an/the" from what people type, so "a hippo" and "hippo" look the same.
 - Keep it light and work-friendly: no health, relationships, money or politics.
 - **Standard pack size: 50 questions** (a test checks this, so a smaller pack won't deploy). Every player is dealt 5 questions (2 to answer + 3 spares), and a room holds up to 10 players, so 50 guarantees nobody in a game gets the same question as someone else. A 6-player game plays ± 8 questions, so a pack lasts about 6 games before questions repeat for your group.
 

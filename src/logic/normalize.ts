@@ -37,6 +37,20 @@ export function answerHash(text: string, roomCode: string, q: number): string {
   return hash53(normalize(text), 0) + hash53(`${roomCode}:${q}`, 7).slice(0, 4);
 }
 
+/**
+ * Tidy an answer before it's saved, so typing habits don't give anyone away: trim, single
+ * spaces, no trailing full stop or exclamation mark. For "label" questions ("My favourite
+ * animal: ____") or questions that already contain the article ("I'd be a ____"), a leading
+ * a/an/the is dropped too, so "a hippo" and "hippo" end up the same.
+ * (Capitalisation is evened out on screen: answers are shown in capitals.)
+ */
+export function cleanAnswer(text: string, template?: string): string {
+  let s = text.replace(/\s+/g, ' ').trim().replace(/[.!,;:]+$/, '').trim();
+  const beforeBlank = template?.split('____')[0].trimEnd() ?? '';
+  if (/(:|\b(a|an|the))$/i.test(beforeBlank)) s = s.replace(/^(a|an|the)\s+/i, '');
+  return s;
+}
+
 /** Answer length limits (characters). */
 export const MAX_ANSWER = 80;
 

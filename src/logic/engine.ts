@@ -4,7 +4,7 @@
  */
 import { GAME, TIMERS } from '../config/game';
 import { SCORING } from '../config/scoring';
-import { answerHash, normalize } from './normalize';
+import { answerHash, cleanAnswer, normalize } from './normalize';
 import { dealPrompts, historyPath, type PromptHistory } from './prompts';
 import { randomId, shuffle, type Rng } from './random';
 import type {
@@ -173,7 +173,9 @@ export function answeredTruths(room: Room, pid: Pid): string[] {
  */
 export function planQuestions(room: Room, ctx: Ctx): Question[] {
   const active = activePids(room);
-  const perRound = Math.min(GAME.questionsPerRound[room.meta.length], active.length);
+  const setting = GAME.questionsPerRound[room.meta.length];
+  const playAll = setting === 'all';
+  const perRound = playAll ? active.length : setting;
   const remaining = new Map<Pid, string[]>(
     shuffle(active, ctx.rng).map((pid) => [pid, answeredTruths(room, pid)]),
   );
@@ -182,9 +184,10 @@ export function planQuestions(room: Room, ctx: Ctx): Question[] {
   for (const round of [1, 2] as const) {
     const inRound = new Set<Pid>();
     for (let i = 0; i < perRound; i++) {
-      const candidates = [...remaining.entries()]
-        .filter(([pid, ids]) => ids.length > 0 && !inRound.has(pid))
-        .sort((a, b) => (featured.get(a[0]) ?? 0) - (featured.get(b[0]) ?? 0));
+      const byFewestFeatured = (a: [Pid, string[]], b: [Pid, string[]]) => (featured.get(a[0]) ?? 0) - (featured.get(b[0]) ?? 0);
+      let candidates = [...remaining.entries()].filter(([pid, ids]) => ids.length > 0 && !inRound.has(pid)).sort(byFewestFeatured);
+      // Short game: if some players didn't answer, someone may come up twice in a round so it still has its questions.
+      if (!candidates.length && !playAll) candidates = [...remaining.entries()].filter(([, ids]) => ids.length > 0).sort(byFewestFeatured);
       if (!candidates.length) break;
       const [pid, ids] = candidates[0];
       const promptId = ids.shift()!;
@@ -241,8 +244,9 @@ export function startPick(room: Room, ctx: Ctx): Updates {
   }
 
   const prompt = ctx.pack.prompts.find((p) => p.id === question.promptId);
-  for (const house of shuffle(prompt?.lies ?? [], ctx.rng)) {
+  for (const raw of shuffle(prompt?.lies ?? [], ctx.rng)) {
     if (entries.length >= GAME.minOptions) break;
+    const house = cleanAnswer(raw, prompt?.them);
     const n = normalize(house);
     if (seen.has(n)) continue;
     seen.add(n);

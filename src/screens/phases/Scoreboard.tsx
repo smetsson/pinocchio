@@ -11,11 +11,13 @@ import { useGame } from '../../ui/game';
 export function Scoreboard({ animate }: { animate?: boolean }) {
   const { room } = useGame();
   const before = animate ? scoresBefore(room) : room.pub?.scores ?? {};
+  // After round 1 everyone started at 0, so movement arrows would mean nothing.
+  const showMoves = Object.values(before).some((s) => s !== 0);
   const oldRank = Object.fromEntries(standings(room, before).map((r) => [r.pid, r.rank]));
   return (
     <div class="points-list" data-testid="scoreboard">
       {standings(room).map((r, i) => (
-        <ScoreRow key={r.pid} pid={r.pid} rank={r.rank} from={before[r.pid] ?? 0} to={r.score} moved={(oldRank[r.pid] ?? r.rank) - r.rank} index={i} />
+        <ScoreRow key={r.pid} pid={r.pid} rank={r.rank} from={before[r.pid] ?? 0} to={r.score} moved={showMoves ? (oldRank[r.pid] ?? r.rank) - r.rank : 0} index={i} />
       ))}
     </div>
   );

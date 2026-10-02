@@ -56,6 +56,8 @@ export function Lie() {
     );
   }
 
+  const prompt = pack.prompts.find((p) => p.id === room.pub?.questions?.[q]?.promptId);
+
   const fail = (msg: string) => {
     setError(msg);
     setShakeKey((k) => k + 1);
@@ -63,10 +65,10 @@ export function Lie() {
 
   const submit = async (e: Event) => {
     e.preventDefault();
-    const check = checkLie(room, code, q, text);
+    const check = checkLie(room, code, q, text, prompt?.them);
     if (check !== 'ok') return fail(MESSAGES[check]);
     setBusy(true);
-    const ok = await act(lieUpdates(code, pid, q, text));
+    const ok = await act(lieUpdates(code, pid, q, text, prompt?.them));
     setBusy(false);
     if (ok) {
       (document.activeElement as HTMLElement | null)?.blur();
@@ -80,10 +82,8 @@ export function Lie() {
 
   /** Fill in the next suggestion that nobody has used yet. Returns false when out of ideas. */
   const lieForMe = (skip = text): boolean => {
-    const question = room.pub?.questions?.[q];
-    const prompt = pack.prompts.find((p) => p.id === question?.promptId);
     let pool = suggestions.length ? suggestions : shuffle(prompt?.lies ?? []);
-    pool = pool.filter((s) => checkLie(room, code, q, s) === 'ok' && s !== skip);
+    pool = pool.filter((s) => checkLie(room, code, q, s, prompt?.them) === 'ok' && s !== skip);
     if (!pool.length) {
       fail(t.lie.noIdeas);
       return false;

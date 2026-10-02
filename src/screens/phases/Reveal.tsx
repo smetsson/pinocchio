@@ -132,7 +132,7 @@ function Summary({ truthText }: { truthText: string }) {
           {unpicked.map((s) => (
             <div class="points-row" key={s.optId}>
               <span>
-                “{s.text}” <span class="muted small">— {s.kind === 'house' ? t.reveal.houseLie : room.players?.[s.author ?? '']?.name}</span>
+                <span class="answer-text">“{s.text}”</span> <span class="muted small">— {s.kind === 'house' ? t.reveal.houseLie : room.players?.[s.author ?? '']?.name}</span>
               </span>
               {s.likes > 0 && <span class="pts">{t.reveal.likes(s.likes)}</span>}
             </div>

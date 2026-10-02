@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { answerHash, normalize } from '../../src/logic/normalize';
+import { answerHash, cleanAnswer, normalize } from '../../src/logic/normalize';
+
+describe('cleanAnswer', () => {
+  it('tidies spacing and trailing punctuation', () => {
+    expect(cleanAnswer('  Rock   Werchter 2003!! ')).toBe('Rock Werchter 2003');
+    expect(cleanAnswer('a hippo.')).toBe('a hippo');
+  });
+  it('drops a leading article for label questions and questions that contain the article', () => {
+    expect(cleanAnswer('A hippo', 'My favourite animal: ____')).toBe('hippo');
+    expect(cleanAnswer('an owl', "If I were an animal, I'd be a ____")).toBe('owl');
+    expect(cleanAnswer('The Lion King', 'A movie that made me cry is ____')).toBe('The Lion King');
+  });
+});
 
 describe('normalize', () => {
   it('ignores case, spacing, punctuation and accents', () => {

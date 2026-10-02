@@ -4,13 +4,14 @@
  */
 import { GAME } from '../config/game';
 import { roomPath } from './engine';
-import { answerHash, isValidAnswer, normalize } from './normalize';
+import { answerHash, cleanAnswer, isValidAnswer, normalize } from './normalize';
 import type { Pid, Room, Updates } from './types';
 
 export type LieCheck = 'ok' | 'empty' | 'too-long' | 'truth' | 'taken';
 
 /** Can this lie be used? Compares against the (hashed) truth and the other lies. */
-export function checkLie(room: Room, code: string, q: number, text: string): LieCheck {
+export function checkLie(room: Room, code: string, q: number, raw: string, template?: string): LieCheck {
+  const text = cleanAnswer(raw, template);
   if (!normalize(text)) return 'empty';
   if (!isValidAnswer(text)) return 'too-long';
   const h = answerHash(text, code, q);
@@ -19,7 +20,9 @@ export function checkLie(room: Room, code: string, q: number, text: string): Lie
   return 'ok';
 }
 
-export function lieUpdates(code: string, pid: Pid, q: number, text: string): Updates {
+/** `template` = the question about the subject, used to tidy the answer (see cleanAnswer). */
+export function lieUpdates(code: string, pid: Pid, q: number, raw: string, template?: string): Updates {
+  const text = cleanAnswer(raw, template);
   const hash = answerHash(text, code, q);
   return {
     [roomPath(code, `priv/${pid}/lies/${q}`)]: { text: text.trim(), hash },
@@ -29,7 +32,8 @@ export function lieUpdates(code: string, pid: Pid, q: number, text: string): Upd
 }
 
 /** Save one truth. Marks the player done once they've answered enough prompts. */
-export function truthUpdates(room: Room, code: string, pid: Pid, promptId: string, text: string): Updates {
+export function truthUpdates(room: Room, code: string, pid: Pid, promptId: string, raw: string, template?: string): Updates {
+  const text = cleanAnswer(raw, template);
   const truths = { ...(room.priv?.[pid]?.truths ?? {}), [promptId]: text.trim() };
   const answered = Object.values(truths).filter((t) => t.trim()).length;
   const u: Updates = { [roomPath(code, `priv/${pid}/truths/${promptId}`)]: text.trim() || null };
@@ -59,7 +63,7 @@ export function checkFinal(truth: string, lie: string): FinalCheck {
 
 export function finalUpdates(code: string, pid: Pid, truth: string, lie: string): Updates {
   return {
-    [roomPath(code, `priv/${pid}/final`)]: { truth: truth.trim(), lie: lie.trim() },
+    [roomPath(code, `priv/${pid}/final`)]: { truth: cleanAnswer(truth), lie: cleanAnswer(lie) },
     [roomPath(code, `status/${pid}/final`)]: true,
   };
 }

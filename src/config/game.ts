@@ -25,11 +25,14 @@ export const GAME = {
   truthsPerPlayer: 2,
   /** Spare prompts per player for the "🔀 another question" button. */
   sparePromptsPerPlayer: 3,
-  /** Questions per round (round 1 and round 2), per game length. Capped at the number of players. */
+  /**
+   * Questions per round (round 1 and round 2), per game length.
+   * 'all' = every player's answers get played: one per player in round 1, the other in round 2.
+   */
   questionsPerRound: {
-    short: 3, // ~20 min with 6 players
-    standard: 4, // ~30 min with 6 players
-  },
+    short: 3, // 3 + 3 questions: ~20 min
+    standard: 'all', // "Full": everyone's answers, ~40 min with 6 players
+  } as { short: number | 'all'; standard: number | 'all' },
   /** Make sure every pick has at least this many options (house lies fill the gap). */
   minOptions: 3,
   /**

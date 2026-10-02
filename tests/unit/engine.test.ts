@@ -54,7 +54,7 @@ function playQuestion(sim: Sim, liar?: Pid, fooled: Pid[] = []) {
 }
 
 describe('engine: full game', () => {
-  it('plays a 6-player standard game from lobby to awards', () => {
+  it('plays a 6-player full game from lobby to awards (every answer gets played)', () => {
     const sim = newSim(['Ann', 'Bob', 'Cas', 'Dee', 'Eva', 'Fay']);
     sim.advance(); // lobby -> truths
     expect(sim.phase()).toBe('truths');
@@ -67,8 +67,8 @@ describe('engine: full game', () => {
     expect(sim.phase()).toBe('r-lie');
 
     const questions = sim.room.pub!.questions!;
-    expect(questions).toHaveLength(8);
-    expect(questions.filter((q) => q.round === 1)).toHaveLength(4);
+    expect(questions).toHaveLength(12); // 6 players x 2 answers
+    expect(questions.filter((q) => q.round === 1)).toHaveLength(6);
     // Everyone is featured at least once; no one twice in the same round.
     expect(new Set(questions.map((q) => q.subject)).size).toBe(6);
     for (const r of [1, 2]) {
@@ -78,12 +78,12 @@ describe('engine: full game', () => {
     // Played prompts are remembered for next month.
     expect(sim.db.history['work-team'].general[questions[0].promptId]).toBe(sim.now);
 
-    for (let i = 0; i < 4; i++) playQuestion(sim);
+    for (let i = 0; i < 6; i++) playQuestion(sim);
     expect(sim.phase()).toBe('r-end');
     sim.advance();
     expect(sim.phase()).toBe('r-lie');
     expect(engine.currentRound(sim.room)).toBe(2);
-    for (let i = 0; i < 4; i++) playQuestion(sim);
+    for (let i = 0; i < 6; i++) playQuestion(sim);
     expect(sim.phase()).toBe('r-end');
     sim.advance();
     expect(sim.phase()).toBe('f-write');
@@ -321,6 +321,19 @@ describe('engine: scoreboard animation', () => {
 });
 
 describe('engine: short game', () => {
+  it('still plays 3 questions per round when some players did not answer', () => {
+    const sim = newSim(['Ann', 'Bob', 'Cas', 'Dee'], { length: 'short' });
+    sim.advance();
+    // Only Ann and Bob answered (2 answers each).
+    for (const pid of ['p0', 'p1'])
+      for (const id of sim.room.pub!.prompts![pid].slice(0, GAME.truthsPerPlayer))
+        sim.apply(sim.act.truthUpdates(sim.room, CODE, pid, id, `t ${pid} ${id}`));
+    sim.advance();
+    const questions = sim.room.pub!.questions!;
+    expect(questions.filter((q) => q.round === 1)).toHaveLength(3);
+    expect(questions).toHaveLength(4); // all 4 answers that exist
+  });
+
   it('uses 3 questions per round', () => {
     const sim = newSim(['Ann', 'Bob', 'Cas', 'Dee', 'Eva', 'Fay'], { length: 'short' });
     sim.advance();

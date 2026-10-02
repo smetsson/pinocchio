@@ -85,7 +85,7 @@ export function runBot(fb: Fb, code: string, pid: string, speed: number, ownFb =
         const dealt = (room?.pub?.prompts?.[pid] ?? []).slice(0, GAME.truthsPerPlayer);
         for (const id of dealt) {
           const prompt = pack().prompts.find((p) => p.id === id);
-          await write(fb, truthUpdates(room!, code, pid, id, pick(prompt?.lies ?? []) ?? 'Something true'));
+          await write(fb, truthUpdates(room!, code, pid, id, pick(prompt?.lies ?? []) ?? 'Something true', prompt?.me));
         }
       });
     } else if (phase === 'r-lie' && subject !== pid) {
@@ -95,8 +95,8 @@ export function runBot(fb: Fb, code: string, pid: string, speed: number, ownFb =
         const invented = `${pick(['a', 'the'])} ${pick(['secret', 'tiny', 'famous', 'purple', 'haunted'])} ${pick(['llama', 'banana', 'wizard', 'spaceship', 'tuba'])}`;
         // Half the time use a pack suggestion (like "Lie for me"), otherwise invent one.
         const options = Math.random() < 0.5 ? [...shuffle(prompt?.lies ?? []), invented] : [invented, ...(prompt?.lies ?? [])];
-        const lie = options.find((l) => checkLie(room!, code, q, l) === 'ok');
-        if (lie) await write(fb, lieUpdates(code, pid, q, lie));
+        const lie = options.find((l) => checkLie(room!, code, q, l, prompt?.them) === 'ok');
+        if (lie) await write(fb, lieUpdates(code, pid, q, lie, prompt?.them));
       });
     } else if (phase === 'r-pick' && subject !== pid) {
       later(key, async () => {

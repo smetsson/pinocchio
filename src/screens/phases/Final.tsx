@@ -147,7 +147,7 @@ export function FinalReveal() {
           return (
             <div key={`${idx}-${shown}`} class={`tf-option ${shown ? (isTrue ? 'is-true' : 'is-lie') : ''}`}>
               {shown && <span class="stamp" style={{ '--stamp-delay': '0s', ...(isTrue ? {} : { color: 'var(--lie)', borderColor: 'var(--lie)' }) }}>{isTrue ? t.final.trueLabel : t.final.lieLabel}</span>}
-              <span>{text}</span>
+              <span class="answer-text">{text}</span>
               <div class="pickers">
                 {votersFor(idx).map((p, k) => (
                   <PlayerMini key={p} pid={p} delay={0.2 + k * 0.12} />

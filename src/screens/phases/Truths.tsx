@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { t } from '../../i18n';
 import { GAME } from '../../config/game';
 import { truthUpdates } from '../../logic/actions';
-import { MAX_ANSWER } from '../../logic/normalize';
+import { MAX_ANSWER, cleanAnswer } from '../../logic/normalize';
 import { activePids, hasSubmitted } from '../../logic/engine';
 import { PromptText, Timer, WaitingFor } from '../../ui/components';
 import { useGame } from '../../ui/game';
@@ -76,7 +76,7 @@ export function Truths() {
             value={saved[id] ?? ''}
             canSwap={dealt.some((d) => !shown.includes(d) && !saved[d])}
             onSwap={() => swap(i)}
-            onSave={(text) => act(truthUpdates(room, code, pid, id, text))}
+            onSave={(text) => act(truthUpdates(room, code, pid, id, text, prompt.me))}
           />
         );
       })}
@@ -94,7 +94,7 @@ export function Truths() {
 function TruthCard({ template, value, canSwap, onSwap, onSave }: { template: string; value: string; canSwap: boolean; onSwap: () => void; onSave: (t: string) => Promise<boolean> }) {
   const [text, setText] = useState(value);
   const [state, setState] = useState<'idle' | 'saving' | 'saved'>(value ? 'saved' : 'idle');
-  const dirty = text.trim() !== value.trim();
+  const dirty = cleanAnswer(text, template) !== value.trim();
 
   const save = async (e: Event) => {
     e.preventDefault();
