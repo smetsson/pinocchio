@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import { likeUpdates, voteUpdates } from '../../logic/actions';
 import { currentSubject } from '../../logic/engine';
+import { normalize } from '../../logic/normalize';
 import { Progress, WaitingFor, buzz } from '../../ui/components';
 import { useGame } from '../../ui/game';
 import { QuestionHeader } from './QuestionHeader';
@@ -14,6 +15,10 @@ export function Pick() {
   const mine = room.toPlayer?.[pid]?.mine?.[q];
   const vote = room.priv?.[pid]?.votes?.[q];
   const like = room.priv?.[pid]?.likes?.[q];
+  // The subject recognises their own truth among the options (they can't like that one).
+  const question = room.pub?.questions?.[q];
+  const myTruth = isSubject && question ? normalize(room.priv?.[pid]?.truths?.[question.promptId] ?? '') : '';
+  const canLike = !spectator;
 
   return (
     <>
@@ -23,7 +28,7 @@ export function Pick() {
       <Progress />
       <div class="options" data-testid="options">
         {options.map((o, i) => {
-          const isMine = o.id === mine;
+          const isMine = o.id === mine || (!!myTruth && normalize(o.text) === myTruth);
           return (
             <div class="option" key={o.id} style={{ animationDelay: `${i * 0.07}s` }}>
               <button
@@ -34,10 +39,10 @@ export function Pick() {
                   void act(voteUpdates(code, pid, q, o.id));
                 }}
               >
-                {isMine && <span class="tag">{t.pick.yours}</span>}
+                {isMine && <span class="tag">{isSubject ? t.pick.yourTruth : t.pick.yours}</span>}
                 {o.text}
               </button>
-              {!watching && !isMine && (
+              {canLike && !isMine && (
                 <button
                   class={`like-btn ${like === o.id ? 'on' : ''}`}
                   aria-label="like"
@@ -51,7 +56,7 @@ export function Pick() {
           );
         })}
       </div>
-      {!watching && <p class="small muted center">{t.pick.likeHint}</p>}
+      {canLike && <p class="small muted center">{t.pick.likeHint}</p>}
       <WaitingFor onlyMissing noProgress />
     </>
   );

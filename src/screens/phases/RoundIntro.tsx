@@ -6,13 +6,13 @@ import { useGame } from '../../ui/game';
 import { Icon } from '../../ui/PinocchioIcon';
 
 /** "Round 2 · Double points!": a few seconds so everyone on the call knows where we are. */
-export function RoundIntro() {
+export function RoundIntro({ fullscreen }: { fullscreen?: boolean }) {
   const { room } = useGame();
   const round = currentRound(room);
   const info = t.round.intro[round];
   const points = t.round.points(SCORING.multiplier[round] ?? 1);
   return (
-    <div class="round-intro" key={round}>
+    <div class={`round-intro ${fullscreen ? 'round-intro--full' : ''}`} key={round} data-testid="round-intro">
       <div class="round-intro-icon">
         <Icon icon={info.icon} />
       </div>

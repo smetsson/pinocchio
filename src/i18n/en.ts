@@ -153,10 +153,11 @@ export const en = {
   pick: {
     title: 'Find the truth!',
     yours: 'your lie',
+    yourTruth: 'your answer',
     picked: 'Picked! 👀',
     likeHint: 'Tap 👍 on your favourite lie',
     subjectTitle: 'Who will find your truth?',
-    subjectHint: "Everyone's picking. You just watch. 😇",
+    subjectHint: "Everyone's picking. You can still 👍 your favourite lie. 😇",
   },
 
   reveal: {

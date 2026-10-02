@@ -284,8 +284,14 @@ export function scoreQuestion(room: Room, q: number): { reveal: Reveal; stats: R
     const vote = room.priv?.[pid]?.votes?.[q];
     // Can't pick your own lie (the rules block it too).
     if (vote && owners[vote] !== undefined && owners[vote] !== pid) (pickers[vote] ??= []).push(pid);
+  }
+  // Everyone can 👍 a lie, including the player the question is about (but not their own truth).
+  for (const pid of activePids(room)) {
     const like = room.priv?.[pid]?.likes?.[q];
-    if (like && owners[like] !== undefined && owners[like] !== pid) likes[like] = (likes[like] ?? 0) + 1;
+    const owner = like ? owners[like] : undefined;
+    if (!like || owner === undefined || owner === pid) continue;
+    if (pid === question.subject && owner === 'TRUTH') continue;
+    likes[like] = (likes[like] ?? 0) + 1;
   }
 
   const deltas: Record<Pid, number> = {};

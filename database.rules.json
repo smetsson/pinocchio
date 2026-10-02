@@ -123,7 +123,7 @@
             },
             "likes": {
               "$q": {
-                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && (root.child('rooms/' + $code + '/state/phase').val() === 'r-pick') && root.child('rooms/' + $code + '/state/q').val() + '' === $q && root.child('rooms/' + $code + '/pub/questions/' + $q + '/subject').val() !== $pid && (!newData.exists() || newData.val() !== root.child('rooms/' + $code + '/toPlayer/' + $pid + '/mine/' + $q + '').val())",
+                ".write": "auth != null && root.child('rooms/' + $code + '/meta/expiresAt').val() > now && root.child('rooms/' + $code + '/players/' + $pid + '/uid').val() === auth.uid && root.child('rooms/' + $code + '/players/' + $pid + '/kicked').val() !== true && (root.child('rooms/' + $code + '/state/phase').val() === 'r-pick') && root.child('rooms/' + $code + '/state/q').val() + '' === $q && (!newData.exists() || newData.val() !== root.child('rooms/' + $code + '/toPlayer/' + $pid + '/mine/' + $q + '').val())",
                 ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
               }
             },

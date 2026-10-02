@@ -1092,21 +1092,29 @@ label.field {
   }
   .bigscreen #app {
     zoom: 1.2;
+    /* zoom also scales the height: keep the page exactly one screen tall (no scrollbar) */
+    min-height: calc(100dvh / 1.2);
   }
 }
 @media (min-width: 1200px) {
   .bigscreen #app {
     zoom: 1.3;
+    /* zoom also scales the height: keep the page exactly one screen tall (no scrollbar) */
+    min-height: calc(100dvh / 1.3);
   }
 }
 @media (min-width: 1600px) {
   .bigscreen #app {
     zoom: 1.8;
+    /* zoom also scales the height: keep the page exactly one screen tall (no scrollbar) */
+    min-height: calc(100dvh / 1.8);
   }
 }
 @media (min-width: 2200px) {
   .bigscreen #app {
     zoom: 2.4;
+    /* zoom also scales the height: keep the page exactly one screen tall (no scrollbar) */
+    min-height: calc(100dvh / 2.4);
   }
 }
 /* Watching only: options are shown at full contrast, in two columns to fit a 16:9 screen. */
@@ -1361,4 +1369,43 @@ label.field {
   95% {
     transform: rotate(4deg);
   }
+}
+
+/* Big screen: the round card covers the whole screen and scales with it (vmin = % of the
+   shorter screen side), so it fits any laptop or TV without scrolling. */
+.round-intro--full {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  min-height: 0;
+  gap: 2.5vmin;
+  padding: 5vmin;
+  background: radial-gradient(circle at 20% 0%, var(--bg2) 0, transparent 50%),
+    radial-gradient(circle at 100% 100%, var(--bg2) 0, transparent 45%), var(--bg);
+}
+.round-intro--full .round-intro-icon {
+  font-size: 24vmin;
+}
+.round-intro--full .round-intro-title {
+  font-size: 13vmin;
+}
+.round-intro--full .round-intro-points {
+  font-size: 4.5vmin;
+  padding: 1vmin 3.5vmin;
+}
+.round-intro--full .round-intro-sub {
+  font-size: 3.8vmin;
+  max-width: 70vw;
+}
+.round-intro--full .round-intro-timer {
+  width: 40vw;
+}
+.round-intro--full .timer {
+  height: 1.6vmin;
+}
+
+/* While the full-screen round card is up, the page behind it must not scroll. */
+html.bigscreen:has(.round-intro--full),
+html.bigscreen:has(.round-intro--full) body {
+  overflow: hidden;
 }

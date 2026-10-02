@@ -177,6 +177,12 @@ describe('lies and votes', () => {
     await assertSucceeds(db('ann').ref(`rooms/${C}/toPlayer/p1`).get());
   });
 
+  it('the subject may 👍 a lie during the pick phase (but still not vote)', async () => {
+    await seed(roundRoom('r-pick'));
+    await assertSucceeds(db('host').ref(`rooms/${C}/priv/p0/likes/0`).set('optB'));
+    await assertFails(db('host').ref(`rooms/${C}/priv/p0/votes/0`).set('optB'));
+  });
+
   it("the host's secret answer key is hidden from players", async () => {
     await seed({ ...roundRoom('r-pick'), secret: { owners: { 0: { optA: 'p1' } } } });
     await assertFails(db('ann').ref(`rooms/${C}/secret`).get());

@@ -130,7 +130,8 @@ const rules = {
             },
             likes: {
               $q: {
-                '.write': `${me} && ${phase('r-pick')} && ${atQ('$q')} && ${subjectOfQ} !== $pid && (!newData.exists() || newData.val() !== ${mine})`,
+                // Everyone may 👍 a lie, including the subject (who can't vote).
+                '.write': `${me} && ${phase('r-pick')} && ${atQ('$q')} && (!newData.exists() || newData.val() !== ${mine})`,
                 '.validate': str(20),
               },
             },

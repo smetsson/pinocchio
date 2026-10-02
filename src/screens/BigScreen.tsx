@@ -3,6 +3,7 @@
  * It never joins the game; it just shows what's happening in large type.
  */
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
+import { createPortal } from 'preact/compat';
 import type { Fb } from '../data/firebase';
 import { getPack } from '../data/packs';
 import { subscribeRoom, watchServerOffset } from '../data/room';
@@ -101,7 +102,8 @@ function ScreenPhase() {
         </>
       );
     case 'intro':
-      return <RoundIntro />;
+      // Full-screen and sized to the screen itself (outside the zoomed page): never a scrollbar.
+      return createPortal(<RoundIntro fullscreen />, document.body);
     case 'r-lie':
       return <ScreenLie />;
     case 'r-pick':

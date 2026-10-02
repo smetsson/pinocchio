@@ -140,6 +140,34 @@ describe('engine: scoring', () => {
     expect(reveal.steps[0].author).toBe(liar);
   });
 
+  it('lets the subject 👍 a lie (but liking their own truth counts for nothing)', () => {
+    const sim = newSim(['Ann', 'Bob', 'Cas']);
+    toFirstPick(sim);
+    const q = sim.room.state.q;
+    const subject = engine.currentSubject(sim.room)!;
+    const liar = sim.pids.find((p) => p !== subject)!;
+    const owners = sim.room.secret!.owners![q];
+    const liarOpt = Object.keys(owners).find((id) => owners[id] === liar)!;
+    sim.apply(sim.act.likeUpdates(CODE, subject, q, liarOpt));
+    vote(sim);
+    sim.tick();
+    const m = SCORING.multiplier[1];
+    expect(sim.room.pub!.scores![liar]).toBe((SCORING.pickedTruth + SCORING.perLike) * m);
+    expect(sim.room.pub!.stats![liar].likes).toBe(1);
+
+    const sim2 = newSim(['Ann', 'Bob', 'Cas']);
+    toFirstPick(sim2);
+    const q2 = sim2.room.state.q;
+    const subject2 = engine.currentSubject(sim2.room)!;
+    const owners2 = sim2.room.secret!.owners![q2];
+    const truthOpt = Object.keys(owners2).find((id) => owners2[id] === 'TRUTH')!;
+    sim2.apply(sim2.act.likeUpdates(CODE, subject2, q2, truthOpt));
+    vote(sim2);
+    sim2.tick();
+    const truthStep = sim2.room.pub!.reveal![q2].steps.find((s) => s.kind === 'truth')!;
+    expect(truthStep.likes).toBe(0);
+  });
+
   it('ignores a vote for your own lie', () => {
     const sim = newSim(['Ann', 'Bob', 'Cas']);
     toFirstPick(sim);
